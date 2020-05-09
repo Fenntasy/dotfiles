@@ -1,0 +1,3 @@
+hexopen() {
+  open https://hex.pm/packages/${1}
+}

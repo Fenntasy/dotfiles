@@ -1,0 +1,10 @@
+code --install-extension 42Crunch.vscode-openapi
+code --install-extension abalejr.forest-focus
+code --install-extension dbaeumer.vscode-eslint
+code --install-extension esbenp.prettier-vscode
+code --install-extension gerane.Theme-Earthsong
+code --install-extension mrorz.language-gettext
+code --install-extension ms-vsliveshare.vsliveshare
+code --install-extension oderwat.indent-rainbow
+code --install-extension redhat.vscode-yaml
+code --install-extension vscodevim.vim

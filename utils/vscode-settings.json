@@ -1,0 +1,42 @@
+{
+    "indentRainbow.errorColor": "rgba(128,32,32,0.2)",
+    "workbench.colorTheme": "Quiet Light",
+    "window.zoomLevel": 0,
+    "eslint.format.enable": true,
+    "editor.formatOnSave": true,
+    "eslint.enable": true,
+    "eslint.alwaysShowStatus": true,
+    "eslint.validate": [
+        "javascript",
+        "typescript"
+    ],
+    "eslint.packageManager": "yarn",
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+    "[javascript]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+    },
+    "[javascriptreact]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+    },
+    "[typescript]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+    },
+    "[typescriptreact]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+    },
+    "[graphql]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+    },
+    "[json]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+    },
+    "[cson]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+    },
+    "editor.minimap.enabled": false,
+    "html.format.endWithNewline": true,
+    "files.insertFinalNewline": true,
+    "files.trimFinalNewlines": true,
+    "editor.tabSize": 2,
+    "explorer.confirmDragAndDrop": false
+}

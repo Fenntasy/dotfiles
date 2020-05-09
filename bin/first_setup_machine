@@ -1,0 +1,23 @@
+#!/bin/bash
+
+# ---- ASDF ----
+git clone https://github.com/asdf-vm/asdf.git ~/.asdf
+cd ~/.asdf
+git checkout "$(git describe --abbrev=0 --tags)"
+
+# ---- Tmux ----
+git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+~/.tmux/plugins/tpm/bin/install_plugins
+
+# ---- MacOS ----
+
+## Customize touchbar
+defaults write ~/Library/Preferences/com.apple.controlstrip MiniCustomized '(com.apple.system.screen-lock, com.apple.system.volume, com.apple.system.media-play-pause, com.apple.system.do-not-disturb)'
+killall ControlStrip
+
+## Disable auto correct
+defaults write -g NSAutomaticSpellingCorrectionEnabled -bool false
+
+## Enable Key Repeat
+defaults write -g ApplePressAndHoldEnabled -bool false
+defaults write -g KeyRepeat -int 0.02

@@ -1,0 +1,2 @@
+EXCLUDES="README.md utils"
+DOTFILES_DIRS="${HOME}/.dotfiles"

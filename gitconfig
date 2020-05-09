@@ -1,0 +1,37 @@
+# This is Git's per-user configuration file.
+[user]
+  name = Vincent Billey
+  email = vincent.billey@gmail.com
+  signingkey = EAE57B62AC577EFA56EB9B3877D971D8B00669EC
+  useconfigonly = true
+
+[alias]
+  bleach = !git branch -vv | grep "gone]" | awk '{ print $1 }' | xargs git branch -D
+  cleanlocal = "!git_cleanlocal() { git branch --merged ${1:-develop} | grep -v master | grep -v develop | xargs git branch -d; }; git_cleanlocal"
+  current = !git branch | awk '/^* (.*)/ { print $2 }' | sed /^$/d
+  feature = !sh -c 'git checkout -b "feature/#$1-$2"' -
+  issue = !open "https://github.com/$(git remote get-url --push origin | sed -e 's/.*://' -e 's/\\.git//')/issues/$(git current | grep -Eo '#[0-9]+' | sed 's/#//')"
+  oops = commit --amend --no-edit
+  pr = !open "https://github.com/$(git remote get-url origin | sed -e 's/.*://g' -e 's/\\.git$//' | head -n 1)/compare/$(git current | sed 's/#/%23/g')?expand=1"
+  undo = reset --soft HEAD^
+  circleci = !open "https://circleci.com/gh/$(git remote get-url --push origin | sed -e 's/.*://' -e 's/\\.git//' | cut -f 1 -d '/')/workflows/$(git remote get-url --push origin | sed -e 's/.*://' -e 's/\\.git//' | cut -f 2 -d '/')/tree/$(git current | sed 's/#/%23/g')"
+
+[push]
+  default = current
+
+[fetch]
+  prune = true
+
+[commit]
+  gpgsign = true
+
+[core]
+  editor = nvim
+  excludesfile = /Users/fenn/.gitignore
+  ignorecase = false
+
+[rerere]
+  enabled = true
+
+[diff]
+  renames = copies

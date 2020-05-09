@@ -1,0 +1,103 @@
+if filereadable("/usr/local/bin/python")
+  let g:python_host_prog = "/usr/local/bin/python"
+end
+
+if has('python3')
+  " Hide annoying warning
+  silent! python3 1
+endif
+
+let mapleader="\<Space>"
+
+set inccommand=nosplit
+
+set mouse= " disable mouse
+set backspace=indent,eol,start " allow backspace key every time
+set complete=],.,b,u " autocomplete with tag, current buffer, other buffers (loaded and unloaded)
+set completeopt+=noinsert
+set conceallevel=0 " do not use conceal
+set diffopt+=vertical
+set expandtab " use the right number of spaces when pressing tab
+" set formatoptions-=t "prevent auto word wrapping
+set history=500 "history of commands to keep in memory
+set incsearch " jump to the first match as typing
+set laststatus=2 " always display the status line
+set nobackup
+set nocompatible
+set nocursorcolumn
+set nohlsearch " do not highlight search results
+set nomodeline " do not enable vim executable commentary in files (i.e. /* vim: set ft=ruby*/)
+set noswapfile
+set nowrap " do not use softwrap
+set nowritebackup
+set path=.,** " search from current folder and sub folders
+set wildignore+=**/.git/**
+set wildignore+=**/_build/**
+set wildignore+=**/deps/**
+set wildignore+=**/node_modules/**
+set wildignore+=**/*.jpg,**/*.JPG,**/*.png,**/*.PNG,**/*.pdf,**/*.PDF
+set number " display the line numbers
+set relativenumber " display relative number
+set numberwidth=2
+set ruler
+set shiftwidth=2 " number of spaces to use on indentation
+set showcmd
+set spellfile=$HOME/.vim-spell-en.utf-8.add
+set tabstop=2 " number of spaces used to display tabs
+set wildmode=full
+set viminfo='100,f1
+set noshowmode
+
+" highlight current line
+set cursorline
+" only hightlight current line on active buffer
+au BufEnter * setlocal cursorline
+au BufLeave * setlocal nocursorline
+" only hightlight current buffer event with two buffers of the same file
+au WinLeave * setlocal nocursorline
+au WinEnter * setlocal cursorline
+
+set termguicolors
+colorscheme onehalflight
+set fillchars+=vert:│
+hi VertSplit ctermbg=NONE guibg=NONE
+syntax enable
+
+command! American setlocal spell spelllang=en_us
+command! British setlocal spell spelllang=en_gb
+command! Francais setlocal spell spelllang=fr_fr
+
+set splitbelow
+set splitright
+
+" Mapping
+nnoremap <leader>S :source ~/.vimrc<cr>
+
+" Move selection
+xnoremap K :move '<-2<CR>gv-gv
+xnoremap J :move '>+1<CR>gv-gv
+
+" File management - f
+nnoremap <silent> <leader>fd :!mkdir -p "%:p:h"<cr>
+nnoremap <leader>fD :Remove<cr>
+nnoremap <leader>fR :Move <c-r>=expand("%:p:h")<cr>
+
+" Terminal escape
+tnoremap <Esc> <C-\><C-n>
+
+" Grep
+if executable('ag')
+  set grepprg=ag\ --hidden\ --case-sensitive\ --vimgrep\ --column\ $*
+  set grepformat=%f:%l:%c:%m
+  nnoremap <leader>s :silent! grep!<space>
+endif
+
+augroup quickfix
+  autocmd!
+  autocmd QuickFixCmdPost [^l]* cwindow | redraw
+  autocmd QuickFixCmdPost l*    lwindow | redraw
+augroup END
+
+set signcolumn=yes
+
+packloadall

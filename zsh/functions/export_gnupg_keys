@@ -1,0 +1,5 @@
+export_gnupg_keys() {
+  gpg -a --export > ~/.dotfiles-private/gnupg/mypubkeys.asc
+  gpg -a --export-secret-keys > ./dotfiles-private/gnupg/myprivatekeys.asc
+  gpg --export-ownertrust > ./dotfiles-private/gnupg/otrust.txt
+}

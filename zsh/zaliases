@@ -1,0 +1,35 @@
+# Editors
+alias oni='/Applications/Onivim2.App/Contents/MacOS/Oni2'
+alias e='nvim'
+alias vim='nvim'
+alias vi='nvim'
+
+# Docker
+alias dk='docker-compose'
+
+# Kubernetes
+alias k='kubectl'
+alias kctx='kubectx'
+alias kns='kubens'
+
+# Git
+alias a='git add'
+alias d='git diff'
+alias dc='git diff --cached'
+alias gco='git checkout'
+alias gl='git pull --rebase'
+alias gp='git push -u'
+alias gpf='git push --force-with-lease'
+alias gc='git commit'
+alias gcb='git checkout $(git branch | fzf)'
+
+# Postgres
+alias list-postgres-databases='psql -U fenn -l'
+
+# Misc
+
+alias ll='ls -lh'
+alias la='ls -lha'
+alias cd='>/dev/null cd'
+alias uuid="uuidgen | tr -d '\n' | pbcopy"
+alias so='source .env_vars'

@@ -1,0 +1,4 @@
+port_in_use() {
+  local port=${1:?"you should set a port"}
+  lsof -n -i:${port} | grep LISTEN
+}

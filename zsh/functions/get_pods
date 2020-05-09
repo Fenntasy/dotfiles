@@ -1,0 +1,4 @@
+get-pods() {
+  kubens "$1"
+  watch kubectl get pods
+}
