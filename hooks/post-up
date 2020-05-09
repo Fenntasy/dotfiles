@@ -1,8 +1,5 @@
 #!/bin/bash
 
-chmod 600 ~/.ssh/id_*
-chmod 600 ~/.ssh/*.pem
-
 [[ "${SHELL}" != "/bin/zsh" ]] && chsh -s /bin/zsh
 
 source ~/.zshrc
