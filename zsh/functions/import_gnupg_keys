@@ -1,7 +1,0 @@
-import_gnupg_keys() {
-  gpg --import ~/.dotfiles-private/gnupg/myprivatekeys.asc
-  gpg --import ~/.dotfiles-private/gnupg/mypubkeys.asc
-  gpg -K
-  gpg -k
-  # gpg --import-ownertrust ~/.dotfiles-private/gnupg/otrust.txt
-}
