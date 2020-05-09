@@ -1,0 +1,37 @@
+namespace "musthave"
+
+onstart "tpope/vim-commentary"
+onstart "tpope/vim-eunuch"
+onstart "tpope/vim-repeat"
+onstart "tpope/vim-sensible"
+onstart "tpope/vim-surround"
+onstart "tpope/vim-unimpaired"
+onstart "tpope/vim-vinegar"
+onstart "tpope/vim-abolish"
+onstart "chaoren/vim-wordmotion"
+onstart "junegunn/fzf"
+onstart "junegunn/fzf.vim"
+onstart "ntpeters/vim-better-whitespace"
+onstart "dense-analysis/ale"
+onstart "jeetsukumaran/vim-buffergator"
+onstart "voldikss/vim-floaterm"
+onstart "ap/vim-css-color"
+
+namespace "textobjects"
+
+onstart "kana/vim-textobj-user"
+onstart "andyl/vim-textobj-elixir"
+onstart "machakann/vim-swap"
+
+namespace "languages"
+
+onstart "sheerun/vim-polyglot"
+onstart "dense-analysis/ale"
+onstart "fatih/vim-go"
+onstart "elixir-editors/vim-elixir"
+onstart "google/vim-jsonnet"
+
+namespace "themes"
+
+onstart "itchyny/lightline.vim"
+onstart "reedes/vim-colors-pencil"
