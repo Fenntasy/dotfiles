@@ -14,7 +14,6 @@ set inccommand=nosplit
 set mouse= " disable mouse
 set backspace=indent,eol,start " allow backspace key every time
 set complete=],.,b,u " autocomplete with tag, current buffer, other buffers (loaded and unloaded)
-set completeopt+=noinsert
 set conceallevel=0 " do not use conceal
 set diffopt+=vertical
 set expandtab " use the right number of spaces when pressing tab
@@ -47,6 +46,9 @@ set tabstop=2 " number of spaces used to display tabs
 set wildmode=full
 set viminfo='100,f1
 set noshowmode
+filetype plugin on
+set omnifunc=ale#completion#OmniFunc
+set completeopt=menuone,noinsert
 
 " highlight current line
 set cursorline
@@ -71,7 +73,7 @@ set splitbelow
 set splitright
 
 " Mapping
-nnoremap <leader>S :source ~/.vimrc<cr>
+nnoremap <leader>S :source ~/.vim/vimrc<cr>
 
 " Move selection
 xnoremap K :move '<-2<CR>gv-gv
@@ -99,5 +101,7 @@ augroup quickfix
 augroup END
 
 set signcolumn=yes
+
+runtime! settings/*.vim
 
 packloadall
