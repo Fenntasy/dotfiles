@@ -17,6 +17,8 @@ onstart "jeetsukumaran/vim-buffergator"
 onstart "voldikss/vim-floaterm"
 onstart "ap/vim-css-color"
 
+onstart "AndrewRadev/inline_edit.vim"
+
 namespace "textobjects"
 
 onstart "kana/vim-textobj-user"
