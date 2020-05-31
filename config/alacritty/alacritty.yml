@@ -29,11 +29,11 @@ font:
   normal:
     family: Source Code Pro Light
   bold:
-    family: Fira Code
+    family: Source Code Pro
   italic:
-    family: Fira Code
+    family: Source Code Pro Light
   bold_italic:
-    family: Fira Code
+    family: Source Code Pro
   size: 13.0
   offset:
     x: 0
@@ -47,3 +47,9 @@ window:
 
 selection:
   save_to_clipboard: true
+
+key_bindings:
+  - { key: Left,    mods: Alt,     chars: "\x1bb"  }
+  - { key: Right,   mods: Alt,     chars: "\x1bf"  }
+  - { key: Left,    mods: Command, chars: "\x1bb"  }
+  - { key: Right,   mods: Command, chars: "\x1bf"  }
