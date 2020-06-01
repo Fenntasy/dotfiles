@@ -27,17 +27,21 @@ colors:
 
 font:
   normal:
-    family: Source Code Pro Light
+    family: CodeNewRoman Nerd Font
+    style: Book
   bold:
-    family: Source Code Pro
+    family: CodeNewRoman Nerd Font
+    style: Bold
   italic:
-    family: Source Code Pro Light
+    family: CodeNewRoman Nerd Font
+    style: Italic
   bold_italic:
     family: Source Code Pro
-  size: 13.0
+    style: Bold Italic
+  size: 14.0
   offset:
-    x: 0
-    y: 1
+    x: 1
+    y: 2
 
 window:
   padding:
