@@ -60,7 +60,7 @@ au WinLeave * setlocal nocursorline
 au WinEnter * setlocal cursorline
 
 set termguicolors
-colorscheme tempus_dawn
+colorscheme onehalflight
 set fillchars+=vert:│
 hi VertSplit ctermbg=NONE guibg=NONE
 syntax enable

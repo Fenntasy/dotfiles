@@ -31,6 +31,9 @@ PATH="${HOME}/.fewlines-dotfiles:${PATH}"
 
 export PATH
 
+export HOMEBREW_BUNDLE_FILE=${HOME}/.Brewfile
+export HOMEBREW_BUNDLE_NO_LOCK=true
+
 function current_directory_prompt() {
   echo ${PWD/#$HOME/\~} | sed -E 's/([^/])[^/]*\//\1\//g'
 }
@@ -68,6 +71,9 @@ export ANDROID_SDK_ROOT=/Users/fenn/Library/Android/sdk
 
 # allow signed git commits
 export GPG_TTY=$(tty)
+
+# FZF
+export FZF_DEFAULT_OPTS="--color=light"
 
 DISABLE_AUTO_TITLE="true"
 

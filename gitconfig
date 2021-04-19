@@ -35,3 +35,5 @@
 
 [diff]
   renames = copies
+[init]
+	defaultBranch = main

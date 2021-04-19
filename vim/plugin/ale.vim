@@ -22,6 +22,7 @@ let g:ale_fixers = {
 \  'elixir': ['mix_format'],
 \  'go': ['gofmt'],
 \  'javascript': ['eslint'],
+\  'json': ['eslint'],
 \  'typescript': ['eslint'],
 \  'typescriptreact': ['eslint'],
 \  'css': ['stylelint'],
@@ -31,3 +32,4 @@ nnoremap <silent> <leader>aj :ALENext<cr>
 nnoremap <silent> <leader>ak :ALEPrevious<cr>
 nnoremap <silent> <buffer> <C-]> :ALEGoToDefinition<cr>
 nnoremap <silent> <buffer> <C-W><C-]> :ALEGoToDefinitionInVSplit<cr>
+nnoremap <silent> gh :ALEHover<cr>

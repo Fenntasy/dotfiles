@@ -33,3 +33,4 @@ alias la='ls -lha'
 alias cd='>/dev/null cd'
 alias uuid="uuidgen | tr -d '\n' | pbcopy"
 alias so='source .env_vars'
+alias cls='clear && tmux clear-history && clear'

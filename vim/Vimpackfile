@@ -16,6 +16,7 @@ onstart "dense-analysis/ale"
 onstart "jeetsukumaran/vim-buffergator"
 onstart "voldikss/vim-floaterm"
 onstart "ap/vim-css-color"
+onstart "wellle/targets.vim"
 
 onstart "AndrewRadev/inline_edit.vim"
 
