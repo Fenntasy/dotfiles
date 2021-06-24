@@ -5,7 +5,7 @@ alias vim='nvim'
 alias vi='nvim'
 
 # Docker
-alias dk='docker-compose'
+alias dk='docker compose'
 
 # Kubernetes
 alias k='kubectl'
