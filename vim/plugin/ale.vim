@@ -12,21 +12,21 @@ let g:ale_sign_error = ' >'
 let g:ale_sign_warning = ' !'
 let g:ale_linters = {
 \  'elixir': ['credo', 'elixir-ls'],
-\  'javascript': ['eslint', 'tsserver'],
-\  'typescript': ['eslint', 'tsserver'],
 \  'css': ['stylelint'],
 \}
+" \  'javascript': ['eslint', 'tsserver'],
+" \  'typescript': ['eslint', 'tsserver'],
 
 let g:ale_fixers = {
 \  '*': ['remove_trailing_lines', 'trim_whitespace'],
 \  'elixir': ['mix_format'],
 \  'go': ['gofmt'],
-\  'javascript': ['eslint'],
 \  'json': ['eslint'],
-\  'typescript': ['eslint'],
-\  'typescriptreact': ['eslint'],
 \  'css': ['stylelint'],
 \}
+" \  'javascript': ['eslint'],
+" \  'typescript': ['eslint'],
+" \  'typescriptreact': ['eslint'],
 
 nnoremap <silent> <leader>aj :ALENext<cr>
 nnoremap <silent> <leader>ak :ALEPrevious<cr>

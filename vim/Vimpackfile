@@ -33,6 +33,7 @@ onstart "dense-analysis/ale"
 onstart "fatih/vim-go"
 onstart "elixir-editors/vim-elixir"
 onstart "google/vim-jsonnet"
+onstart "neovim/nvim-lspconfig"
 
 namespace "themes"
 

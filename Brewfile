@@ -122,6 +122,7 @@ cask "swiftbar"
 cask "visual-studio-code"
 cask "vlc"
 cask "yandex-cloud-cli"
+cask "zoomus"
 mas "Affinity Designer", id: 824171161
 mas "Drafts", id: 1435957248
 mas "GarageBand", id: 682658836
