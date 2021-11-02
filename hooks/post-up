@@ -1,3 +1,7 @@
 #!/bin/bash
 
 [[ "${SHELL}" != "/bin/zsh" ]] && chsh -s /bin/zsh
+
+git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+
+ln -s "$HOME/.dotfiles/utils/settings.json" "$HOME/Library/Application Support/Code/User/settings.json"

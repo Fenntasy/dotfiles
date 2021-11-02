@@ -1,0 +1,49 @@
+{
+  //Appearance
+  "workbench.colorTheme": "Quiet Light",
+  "editor.minimap.enabled": false,
+  "window.zoomLevel": 1,
+  "editor.bracketPairColorization.enabled": true,
+
+  // Editor Settings
+  "editor.formatOnSave": true,
+  "editor.tabSize": 2,
+  "explorer.confirmDragAndDrop": false,
+  "files.insertFinalNewline": true,
+  "extensions.ignoreRecommendations": true,
+  "editor.renderWhitespace": "none",
+  "window.nativeTabs": true,
+  "files.trimTrailingWhitespace": true,
+  "javascript.updateImportsOnFileMove.enabled": "prompt",
+
+  // Formatting
+  "eslint.format.enable": true,
+  "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+  "[javascript]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+  },
+  "[javascriptreact]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+  },
+  "[graphql]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+
+  // GitLens
+  "gitlens.hovers.currentLine.over": "line",
+  "gitlens.currentLine.enabled": false,
+  "gitlens.codeLens.enabled": false,
+  "diffEditor.ignoreTrimWhitespace": false
+}

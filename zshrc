@@ -5,6 +5,7 @@ export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
 
 # ZSH configuration
+setopt HIST_IGNORE_SPACE
 setopt EXTENDED_HISTORY
 setopt INC_APPEND_HISTORY
 setopt SHARE_HISTORY
@@ -78,3 +79,4 @@ export FZF_DEFAULT_OPTS="--color=light"
 DISABLE_AUTO_TITLE="true"
 
 current_tt
+source /usr/local/Caskroom/yandex-cloud-cli/latest/yandex-cloud-cli/completion.zsh.inc
