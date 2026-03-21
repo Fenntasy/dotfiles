@@ -2,7 +2,8 @@
 [user]
   name = Vincent Billey
   email = vincent.billey@gmail.com
-  signingkey = EAE57B62AC577EFA56EB9B3877D971D8B00669EC
+  ; signingkey = EAE57B62AC577EFA56EB9B3877D971D8B00669EC
+  signingkey = ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAGYDuKehOhR/jtyjTDXcyIbOU4Z/uRlWnn+lCrh9EhB
   useconfigonly = true
 
 [alias]
@@ -37,3 +38,9 @@
   renames = copies
 [init]
 	defaultBranch = main
+
+[gpg]
+  format = ssh
+
+[gpg "ssh"]
+  program = "/Applications/1Password.app/Contents/MacOS/op-ssh-sign"
