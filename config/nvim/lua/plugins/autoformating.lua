@@ -17,7 +17,6 @@ return {
                 'prettier', -- ts/js formatter
                 'stylua', -- lua formatter
                 'eslint_d', -- ts/js linter
-                'eslint_lsp',
                 'shfmt',
                 'ruff',
             },
@@ -27,9 +26,9 @@ return {
 
         local sources = {
             diagnostics.checkmake,
-            formatting.prettier.with { filetypes = { 'html', 'json', 'yaml', 'markdown' } },
+            formatting.prettier.with { filetypes = { 'html', 'json', 'yaml', 'markdown', 'javascript', 'typescript', 'typescriptreact', 'javascriptreact' } },
             formatting.stylua,
-            formatting.eslint_lsp,
+            require 'none-ls.formatting.eslint_d',
             formatting.shfmt.with { args = { '-i', '4' } },
             formatting.terraform_fmt,
             require('none-ls.formatting.ruff').with { extra_args = { '--extend-select', 'I' } },
