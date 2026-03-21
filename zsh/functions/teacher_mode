@@ -1,0 +1,8 @@
+teacher_mode() {
+  if [[ $TEACHER_MODE ]]; then
+    unset TEACHER_MODE;
+  else
+    export TEACHER_MODE=1;
+  fi
+  source ~/.zshrc;
+}

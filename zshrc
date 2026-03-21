@@ -11,6 +11,7 @@ setopt INC_APPEND_HISTORY
 setopt SHARE_HISTORY
 source ${HOME}/.zsh/zcompletion
 source ${HOME}/.zsh/zaliases
+source ${HOME}/.zprofile
 
 # ZSH Bindings
 bindkey -e
@@ -21,7 +22,7 @@ bindkey '^[[Z' reverse-menu-complete # Ctrl-r
 bindkey '^[[A' up-line-or-search # Arrow up
 bindkey '^[[B' down-line-or-search # Arrow down
 
-PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+PATH="/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 PATH="/usr/local/sbin:$PATH"
 PATH="${HOME}/.local/bin:${PATH}"
 PATH="${HOME}/.asdf/shims:${PATH}"
@@ -49,8 +50,17 @@ function _currentKubernetesContextName() {
   fi
 }
 
-setopt prompt_subst
-export PROMPT='%F{blue}$(current_directory_prompt)%f $(_currentKubernetesContextName)%F{green}❯%f '
+
+if [[ $TEACHER_MODE ]]; then
+  autoload -Uz vcs_info
+  precmd() { vcs_info }
+  zstyle ':vcs_info:git:*' formats '[branch] %b'
+  setopt PROMPT_SUBST
+  export PROMPT='%B%c%b%f ${vcs_info_msg_0_} %(?.%F{24}❯%f.%F{198}❯%f) '
+else
+  setopt prompt_subst
+  export PROMPT='%F{blue}$(current_directory_prompt)%f %F{green}❯%f '
+fi
 
 # ASDF
 . $HOME/.asdf/asdf.sh
@@ -78,5 +88,4 @@ export FZF_DEFAULT_OPTS="--color=light"
 
 DISABLE_AUTO_TITLE="true"
 
-current_tt
-source /usr/local/Caskroom/yandex-cloud-cli/latest/yandex-cloud-cli/completion.zsh.inc
+eval "$(mise activate zsh)"
