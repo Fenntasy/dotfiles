@@ -25,7 +25,6 @@ bindkey '^[[B' down-line-or-search # Arrow down
 PATH="/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 PATH="/usr/local/sbin:$PATH"
 PATH="${HOME}/.local/bin:${PATH}"
-PATH="${HOME}/.asdf/shims:${PATH}"
 PATH="./node_modules/.bin:${PATH}"
 PATH="${HOME}/Library/Android//sdk/platform-tools:${PATH}"
 PATH="${HOME}/.bin:${PATH}"
@@ -61,9 +60,6 @@ else
   setopt prompt_subst
   export PROMPT='%F{blue}$(current_directory_prompt)%f %F{green}❯%f '
 fi
-
-# ASDF
-. $HOME/.asdf/asdf.sh
 
 # Kubernetes
 export TILLER_NAMESPACE=tiller

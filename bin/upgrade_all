@@ -5,9 +5,9 @@ brew update
 brew upgrade
 brew cleanup
 
-echo "------------------------------------------- ASDF -------------------------------------------\n"
-asdf update
-asdf plugin-update --all
+echo "------------------------------------------- MISE -------------------------------------------\n"
+mise self-update
+mise plugins update
 
 echo "---------------------------------------- APP STORE -----------------------------------------\n"
 mas outdated
