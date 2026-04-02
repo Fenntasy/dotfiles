@@ -46,8 +46,9 @@ case "$COMMAND" in
       esac
       if echo "$marg" | grep -qE '^[0-9]+$'; then
         PR_NUMBER="$marg"
-      elif echo "$marg" | grep -q 'github.com'; then
+      elif echo "$marg" | grep -qE '^https?://github\.com'; then
         PR_NUMBER=$(echo "$marg" | grep -oE '[0-9]+$')
+        [ -z "$PR_NUMBER" ] && { echo "BLOCK: Could not parse PR number from URL '$marg'." >&2; exit 2; }
       else
         # branch name — resolve directly
         CURRENT_BRANCH=$(gh pr view "$marg" --json headRefName --jq '.headRefName' 2>/dev/null) || {
@@ -110,7 +111,7 @@ case "$COMMAND" in
       if [ "$DST" = "HEAD" ]; then
         CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null) || exit 0
       else
-        CURRENT_BRANCH="$DST"
+        CURRENT_BRANCH="${DST#refs/heads/}"
       fi
     elif [ "$PUSH_TARGET" = "HEAD" ]; then
       CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null) || exit 0
