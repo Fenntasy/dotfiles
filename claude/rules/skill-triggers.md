@@ -32,6 +32,8 @@ When the user's request matches an intent below, invoke the skill before startin
 | `/documentation`    | Doc audit, writing, or restructuring           | "audit docs", "update docs", "docs are stale", "revamp documentation"                |
 | `/requirements`     | Clarifying what to build before implementation | "what should this do", "requirements", "acceptance criteria", "EARS", "user stories" |
 | `/project-audit`    | Comprehensive project health audit             | "full audit", "audit the project", "check for drift", "are our rules still accurate" |
+| `/frontend-design`  | Designing new pages, components, or visual UI  | "design this page", "make it look good", "style this", "new page UI", "visual direction" |
+| `/roborev`          | Code review workflow, fixing findings, pre-push | "roborev", "review findings", "fix findings", "review before push"                   |
 
 ## Composite workflows
 
@@ -41,7 +43,7 @@ Most real tasks need multiple skills. When a task matches a pattern below, load 
 | ------------------------------- | --------------------- | ---------------------------------- | ---------------------------------------------------------- |
 | Full-stack feature (API + page) | project feature skill | `/api-design`, `/react-router`, `/react` | "add X feature", "new endpoint with UI"                    |
 | API endpoint (no frontend)      | `/api-design`         | -                                        | "add endpoint", "new handler"                              |
-| Frontend page with data         | `/react-router`       | `/react`, `/css-responsive`              | "new page", "add a route with data"                        |
+| Frontend page with data         | `/react-router`       | `/react`, `/css-responsive`, `/frontend-design` | "new page", "add a route with data"                 |
 | Design system work              | `/ux-design`          | `/css-responsive`                        | "update tokens", "theme", "component variants"             |
 | Security hardening              | `/web-security`       | `/react-router`, `/react`                | "security audit", "pen test findings"                      |
 | Testing campaign                | `/typescript`         | `/react`, `/react-router`                | "add test coverage", "write E2E tests"                     |
