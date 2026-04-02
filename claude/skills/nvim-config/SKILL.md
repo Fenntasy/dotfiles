@@ -54,6 +54,8 @@ loaded above. Always cite the specific file and relevant lines.
 | `plugins/treesitter.lua` | Syntax, text objects, incremental selection |
 | `plugins/gitsigns.lua` | Git gutter signs |
 | `plugins/bufferline.lua` | Buffer tabs (`Tab`, `Shift+Tab`, `<leader>x`) |
+| `plugins/lualine.lua` | Status line appearance and mode colors |
+| `plugins/colortheme.lua` | Color scheme (Tokyo Night Day) |
 
 ## Key conventions
 
