@@ -44,7 +44,17 @@ case "$COMMAND" in
         -A|--author-email|-b|--body|-F|--body-file|-t|--subject|-R|--repo|--match-head-commit) SKIP_NEXT=true; continue ;;
         -*) continue ;;
       esac
-      if echo "$marg" | grep -qE '^[0-9]+$'; then PR_NUMBER="$marg"; fi
+      if echo "$marg" | grep -qE '^[0-9]+$'; then
+        PR_NUMBER="$marg"
+      elif echo "$marg" | grep -q 'github.com'; then
+        PR_NUMBER=$(echo "$marg" | grep -oE '[0-9]+$')
+      else
+        # branch name — resolve directly
+        CURRENT_BRANCH=$(gh pr view "$marg" --json headRefName --jq '.headRefName' 2>/dev/null) || {
+          echo "BLOCK: Could not resolve PR for branch '$marg'. Check \`gh auth status\`." >&2
+          exit 2
+        }
+      fi
       break
     done
     if [ -n "$PR_NUMBER" ]; then
@@ -52,7 +62,7 @@ case "$COMMAND" in
         echo "BLOCK: Could not resolve PR #$PR_NUMBER head branch. Check \`gh auth status\`." >&2
         exit 2
       }
-    else
+    elif [ -z "$CURRENT_BRANCH" ]; then
       CURRENT_BRANCH=$(gh pr view --json headRefName --jq '.headRefName' 2>/dev/null) || {
         echo "BLOCK: Could not resolve PR for current branch. Check \`gh auth status\`." >&2
         exit 2
