@@ -10,7 +10,6 @@ setopt INC_APPEND_HISTORY
 setopt SHARE_HISTORY
 source ${HOME}/.zsh/zcompletion
 source ${HOME}/.zsh/zaliases
-source ${HOME}/.zprofile
 
 # ZSH Bindings
 bindkey -e
@@ -29,6 +28,8 @@ PATH="${HOME}/.bin:${PATH}"
 PATH="/Library/TeX/texbin/:$PATH"
 
 export PATH
+
+source ${HOME}/.zprofile
 
 export HOMEBREW_BUNDLE_FILE=${HOME}/.Brewfile
 export HOMEBREW_BUNDLE_NO_LOCK=true

@@ -36,17 +36,3 @@ format = '[☸]($style) [$context]($style) \($namespace\) '
 contexts = [
     { context_pattern = "aks_prod.*", style = "red", context_alias = "prod" }
 ]
-
-# [kubernetes.namespace_aliases]
-# "aks-prod-app-westeurope-02--workshop-quote-engine" = "quote-engine"
-# namespaces = [
-#     { 
-# ]
-
-# [[kubernetes.namespaces]]
-# Using capture groups
-# Contexts from GKE, AWS and other cloud providers usually carry additional information, like the region/zone.
-# The following entry matches on the GKE format (`gke_projectname_zone_cluster-name`)
-# and renames every matching kube context into a more readable format (`gke-cluster-name`):
-# context_pattern = "aks-(prod|preprod|dev)-app-(west|north)europe-[0-9]{2}--(?P<namespace>[\\w-]+)"
-# context_alias = "$namespace"
