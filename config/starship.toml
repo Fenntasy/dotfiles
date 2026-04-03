@@ -1,0 +1,38 @@
+# Get editor completions based on the config schema
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Inserts a blank line between shell prompts
+add_newline = true
+format = """$cmd_duration\
+$directory$hostname$localip$shlvl$shell$env_var$jobs$sudo$username\
+$git_branch$git_commit$git_state$git_status\
+$singularity$vcsh$fossil_branch\
+$hg_branch$pijul_channel$docker_context$package$c$cmake$cobol$daml$dart$deno\
+$dotnet$elixir$elm$erlang$fennel$golang$guix_shell$haskell$haxe$helm\
+$java$julia$kotlin$gradle$lua$nim$nodejs$ocaml$opa$perl$php$pulumi\
+$purescript$python$raku$rlang$red$ruby$rust$scala$solidity$swift$terraform\
+$vlang$vagrant$zig$buf$conda$meson$spack$memory_usage\
+$fill\
+$azure$aws$gcloud$openstack$kubernetes$crystal$custom$status$os$battery$time\
+\n$character"""
+
+[fill]
+symbol = ' '
+
+# Disable the package module, hiding it from the prompt completely
+[package]
+disabled = false
+
+[nodejs]
+format = " [ node ($version)](bold bright-green)"
+version_format = "${raw}"
+detect_files = ["package-lock.json", "yarn.lock"]
+detect_folders = ["node_modules"]
+detect_extensions = []
+
+[kubernetes]
+disabled = false
+format = '[☸]($style) [$context]($style) \($namespace\) '
+contexts = [
+    { context_pattern = "aks_prod.*", style = "red", context_alias = "prod" }
+]

@@ -1,4 +1,3 @@
-export CDPATH=~:~/Workspace:~/Workspace/fewlinesco
 export VISUAL=nvim
 export EDITOR="$VISUAL"
 export LC_ALL=en_US.UTF-8
@@ -11,7 +10,6 @@ setopt INC_APPEND_HISTORY
 setopt SHARE_HISTORY
 source ${HOME}/.zsh/zcompletion
 source ${HOME}/.zsh/zaliases
-source ${HOME}/.zprofile
 
 # ZSH Bindings
 bindkey -e
@@ -22,66 +20,37 @@ bindkey '^[[Z' reverse-menu-complete # Ctrl-r
 bindkey '^[[A' up-line-or-search # Arrow up
 bindkey '^[[B' down-line-or-search # Arrow down
 
-PATH="/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 PATH="/usr/local/sbin:$PATH"
 PATH="${HOME}/.local/bin:${PATH}"
 PATH="./node_modules/.bin:${PATH}"
-PATH="${HOME}/Library/Android//sdk/platform-tools:${PATH}"
 PATH="${HOME}/.bin:${PATH}"
-PATH="${HOME}/.fewlines-dotfiles:${PATH}"
+PATH="/Library/TeX/texbin/:$PATH"
 
 export PATH
+
+source ${HOME}/.zprofile
 
 export HOMEBREW_BUNDLE_FILE=${HOME}/.Brewfile
 export HOMEBREW_BUNDLE_NO_LOCK=true
 
-function current_directory_prompt() {
-  echo ${PWD/#$HOME/\~} | sed -E 's/([^/])[^/]*\//\1\//g'
-}
-
-function _currentKubernetesContextName() {
-  local context=$(kubectl config current-context 2> /dev/null);
-
-  if [ -z "${context}" -o "${context}" = "docker-desktop" ]; then
-    echo ""
-  else
-    echo "%{%F{1}%} ${context}%{%f%} "
-  fi
-}
-
-
+# Prompt
 if [[ $TEACHER_MODE ]]; then
-  autoload -Uz vcs_info
-  precmd() { vcs_info }
-  zstyle ':vcs_info:git:*' formats '[branch] %b'
   setopt PROMPT_SUBST
-  export PROMPT='%B%c%b%f ${vcs_info_msg_0_} %(?.%F{24}❯%f.%F{198}❯%f) '
+  export PROMPT='%B%c%b%f %(?.%F{24}❯%f.%F{198}❯%f) '
 else
-  setopt prompt_subst
-  export PROMPT='%F{blue}$(current_directory_prompt)%f %F{green}❯%f '
+  eval "$(starship init zsh)"
 fi
-
-# Kubernetes
-export TILLER_NAMESPACE=tiller
-export HELM_TLS_ENABLE=true
-
-# Erlang
-export KERL_CONFIGURE_OPTIONS="--disable-debug --without-javac --with-wx"
-
-# Go
-export GOPATH="${HOME}/Workspace/go"
-export PATH=$PATH:$GOPATH/bin
-
-# Android
-export ANDROID_HOME=/Users/fenn/Library/Android/sdk
-export ANDROID_SDK_ROOT=/Users/fenn/Library/Android/sdk
-
-# allow signed git commits
-export GPG_TTY=$(tty)
 
 # FZF
 export FZF_DEFAULT_OPTS="--color=light"
 
+# allow signed git commits
+export GPG_TTY=$(tty)
+
 DISABLE_AUTO_TITLE="true"
 
 eval "$(mise activate zsh)"
+
+# Source secrets (CDPATH, tokens, etc.)
+[[ -f ${HOME}/.zshrc.secrets ]] && source ${HOME}/.zshrc.secrets
