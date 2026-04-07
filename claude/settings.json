@@ -19,7 +19,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "jq -r '.notification_type // \"needs attention\"' | { read -r t; osascript -e \"display notification \\\"$t\\\" with title \\\"Claude Code\\\"\"; }",
+            "command": "jq -r '.notification_type // \"needs attention\"' | { read -r t; t=\"${t//\\\"/}\"; osascript -e \"display notification \\\"$t\\\" with title \\\"Claude Code\\\"\"; }",
             "timeout": 5
           }
         ]
