@@ -13,8 +13,32 @@
     "OTEL_METRICS_INCLUDE_VERSION": "true",
     "OTEL_RESOURCE_ATTRIBUTES": "user.name=fenn"
   },
+  "hooks": {
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.notification_type // \"needs attention\"' | { read -r t; osascript -e \"display notification \\\"$t\\\" with title \\\"Claude Code\\\"\"; }",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  },
   "statusLine": {
     "type": "command",
     "command": "~/.claude/statusline.sh"
+  },
+  "extraKnownMarketplaces": {
+    "playwright-skill": {
+      "source": {
+        "source": "github",
+        "repo": "lackeyjb/playwright-skill"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "playwright-skill@playwright-skill": true
   }
 }
