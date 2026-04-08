@@ -45,8 +45,8 @@ fi
 # FZF
 export FZF_DEFAULT_OPTS="--color=light"
 
-# allow signed git commits
-export GPG_TTY=$(tty)
+# allow signed git commits via 1Password SSH agent
+export SSH_AUTH_SOCK=~/Library/Group\ Containers/2BUA8C4S2C.com.1password/t/agent.sock
 
 DISABLE_AUTO_TITLE="true"
 
