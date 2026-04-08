@@ -30,6 +30,10 @@
     "type": "command",
     "command": "~/.claude/statusline.sh"
   },
+  "enabledPlugins": {
+    "playwright-skill@playwright-skill": true,
+    "frontend-design@claude-plugins-official": true
+  },
   "extraKnownMarketplaces": {
     "playwright-skill": {
       "source": {
@@ -37,8 +41,5 @@
         "repo": "lackeyjb/playwright-skill"
       }
     }
-  },
-  "enabledPlugins": {
-    "playwright-skill@playwright-skill": true
   }
 }

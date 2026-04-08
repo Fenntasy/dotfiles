@@ -91,15 +91,12 @@ export async function action({ request }: ActionFunctionArgs) {
   if (intent === "delete") {
     const id = String(formData.get("id") ?? "");
     if (!id)
-      return Response.json(
-        { error: "Missing id", intent: "delete" },
-        { status: 400 },
-      );
+      return data({ error: "Missing id", intent: "delete" }, { status: 400 });
     try {
       await api.deleteResource(id);
-      return Response.json({ success: true, intent: "delete" });
+      return data({ success: true, intent: "delete" });
     } catch (error) {
-      return Response.json(
+      return data(
         { error: "Failed to delete", intent: "delete" },
         { status: 500 },
       );
@@ -119,8 +116,20 @@ Multi-action routes use a hidden `_intent` field to discriminate between actions
 type ActionResult = { intent: string; error?: string; success?: boolean };
 ```
 
-- Use `Response.json()` for both success and error — **never throw for expected user errors** (throws trigger `ErrorBoundary` and lose form state)
+- Use `data()` from `react-router` for both success and error — **never throw for expected user errors** (throws trigger `ErrorBoundary` and lose form state)
+- **Never use `Response.json()`** — it returns an opaque `Response` type that breaks `useActionData<typeof action>()` inference when the action also calls `redirect()`, causing the inferred type to collapse to `never`
+- Use `satisfies ActionResult` on the payload to get compile-time checking without widening the type
 - Access via `useActionData<typeof action>()` — validate with a type guard since it returns `unknown`
+
+```typescript
+// CORRECT — data() preserves type inference
+return data({ intent: "error", error: "Not found" } satisfies ActionResult, {
+  status: 404,
+});
+
+// WRONG — Response.json() breaks useActionData inference when action also redirects
+return Response.json({ intent: "error", error: "Not found" }, { status: 404 });
+```
 
 ### `useFetcher` for non-navigation mutations
 
@@ -298,7 +307,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 export async function action({ request }: ActionFunctionArgs) {
   const formData = await request.formData();
   await apiClient.createResource(parseCreateForm(formData));
-  return Response.json({ success: true, intent: "create" });
+  return data({ success: true, intent: "create" });
 }
 
 // WRONG — direct API call in a component
@@ -319,13 +328,10 @@ Catch API errors in the action and return a typed error response — never let t
 ```typescript
 try {
   await apiClient.deleteResource(id);
-  return Response.json({ success: true, intent: "delete" });
+  return data({ success: true, intent: "delete" });
 } catch (error) {
   const status = error instanceof ApiError ? error.status : 500;
-  return Response.json(
-    { error: "Failed to delete", intent: "delete" },
-    { status },
-  );
+  return data({ error: "Failed to delete", intent: "delete" }, { status });
 }
 ```
 
@@ -337,20 +343,21 @@ try {
 
 These patterns belong to the SPA era where the client managed its own data. In a server-first architecture they add complexity, fight the framework, and break progressive enhancement.
 
-| SPA anti-pattern                        | Problem                                          | React Router alternative                       |
-| --------------------------------------- | ------------------------------------------------ | ---------------------------------------------- |
-| `useEffect` for data fetching           | Waterfalls, race conditions, no SSR              | Route loaders                                  |
-| `onClick` + `fetch` for mutations       | No progressive enhancement, no revalidation      | `<Form method="post">`                         |
-| Client-side `fetch` in components       | Bypasses loader caching, invisible to framework  | Move to loader or action                       |
-| TanStack Query / SWR for route data     | Duplicate cache layer, fights revalidation       | `useLoaderData` is the cache                   |
-| `useState` for form fields              | Extra state, out of sync with DOM                | `defaultValue` + uncontrolled inputs           |
-| `useReducer` for form state             | Over-engineering what the DOM already does       | `<Form>` + `FormData`                          |
-| Client-side form validation libraries   | Duplicates server logic, false sense of security | HTML5 attributes + server validation in action |
-| `useEffect` to sync action results      | Extra render cycle, stale values                 | `useActionData()` directly                     |
-| Zustand/Redux for server data           | Wrong tool — these are for client-only state     | Loaders own server data                        |
-| Throwing from actions for user errors   | Triggers ErrorBoundary, loses form state         | `Response.json({ error })`                     |
-| Copying `useLoaderData` into `useState` | Two sources of truth, stale data                 | Use `useLoaderData` directly                   |
-| `useState` for filters/pagination       | Not shareable, lost on navigation                | `useSearchParams`                              |
+| SPA anti-pattern                        | Problem                                                                            | React Router alternative                       |
+| --------------------------------------- | ---------------------------------------------------------------------------------- | ---------------------------------------------- |
+| `useEffect` for data fetching           | Waterfalls, race conditions, no SSR                                                | Route loaders                                  |
+| `onClick` + `fetch` for mutations       | No progressive enhancement, no revalidation                                        | `<Form method="post">`                         |
+| Client-side `fetch` in components       | Bypasses loader caching, invisible to framework                                    | Move to loader or action                       |
+| TanStack Query / SWR for route data     | Duplicate cache layer, fights revalidation                                         | `useLoaderData` is the cache                   |
+| `useState` for form fields              | Extra state, out of sync with DOM                                                  | `defaultValue` + uncontrolled inputs           |
+| `useReducer` for form state             | Over-engineering what the DOM already does                                         | `<Form>` + `FormData`                          |
+| Client-side form validation libraries   | Duplicates server logic, false sense of security                                   | HTML5 attributes + server validation in action |
+| `useEffect` to sync action results      | Extra render cycle, stale values                                                   | `useActionData()` directly                     |
+| Zustand/Redux for server data           | Wrong tool — these are for client-only state                                       | Loaders own server data                        |
+| Throwing from actions for user errors   | Triggers ErrorBoundary, loses form state                                           | `data({ error })` from `react-router`          |
+| `Response.json()` in actions            | Breaks `useActionData` inference when action also redirects (collapses to `never`) | `data()` from `react-router`                   |
+| Copying `useLoaderData` into `useState` | Two sources of truth, stale data                                                   | Use `useLoaderData` directly                   |
+| `useState` for filters/pagination       | Not shareable, lost on navigation                                                  | `useSearchParams`                              |
 
 ---
 

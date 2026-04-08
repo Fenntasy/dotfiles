@@ -157,6 +157,32 @@ export const handlers = [
 ];
 ```
 
+### Declare assertion count upfront
+
+Always open every test with `expect.assertions(N)` where N is the total number of `expect()` calls in the test body. This prevents tests from silently passing when assertions are inside conditionals that never execute.
+
+```typescript
+// WRONG — passes vacuously if body.intent is never "field_errors"
+it("returns field errors on bad input", async () => {
+  const { body } = await callAction({ email: "bad" });
+  if (body.intent === "field_errors") {
+    expect(body.errors.email).toBeTruthy();
+  }
+});
+
+// CORRECT — fails if the expect() inside the if never ran
+it("returns field errors on bad input", async () => {
+  expect.assertions(2);
+  const { body } = await callAction({ email: "bad" });
+  expect(body.intent).toBe("field_errors");
+  if (body.intent === "field_errors") {
+    expect(body.errors.email).toBeTruthy();
+  }
+});
+```
+
+Count every `expect()` call, including those inside `if` branches, `.forEach`, and `try/catch` blocks.
+
 ### Stop using snapshot tests
 
 Snapshots create noise, break on any DOM change, and discourage TDD:
