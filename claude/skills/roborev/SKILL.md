@@ -18,14 +18,28 @@ Roborev is a daemon-based automated code review tool. It runs post-commit hooks 
 - After roborev flags issues — read findings, fix them, verify
 - When the PreToolUse hook blocks a push or merge due to unaddressed findings
 - For manual review commands (dirty review, branch review, specific commit)
+- After the pre-push gate runs `roborev review --branch --agent claude-code` — the gate is **not** a silent loop; treat findings the same as any other roborev invocation
+
+## Display protocol (applies to every invocation)
+
+Before any analysis, recommendation, or fix, **show the user the raw output of `roborev show <job-id>`** for the latest completed review. Paste it verbatim — not a summary, not a paraphrase.
+
+Only after the raw output is visible may you:
+
+1. Add your own analysis below it (severity triage, claim verification, recommendations).
+2. Ask the user how to proceed.
+
+Rationale: the user must see what the reviewer actually said before any decisions are made. Summaries lose information, and starting to fix before the findings are on screen takes the decision away from the user.
 
 ## Review Modes
 
 ### Interactive mode (default)
 
-Invoked with `/roborev` or `/roborev interactive`. Walks through each finding with the user.
+This is the default for **any** roborev review you trigger or observe — including the pre-push gate, the PreToolUse hook unblock flow, and post-commit auto-reviews. Auto mode is opt-in only.
 
-1. Run `roborev show` to get the latest review
+Invoked with `/roborev` or `/roborev interactive`, or implicitly anytime roborev produces findings without an explicit `/roborev auto` instruction.
+
+1. Run `roborev show` to get the latest review and **show the raw output to the user** (see Display protocol above)
 2. If no findings → report clean and stop
 3. For each finding (severity order: blocker → medium → low):
    - **Reflect first** — before presenting options, reason about the finding against the project's architecture and design philosophy. Read the relevant code, check project rules, and determine which action best serves codebase coherence. Present your recommendation with rationale, not a bare option list
@@ -39,13 +53,13 @@ Invoked with `/roborev` or `/roborev interactive`. Walks through each finding wi
 5. Repeat until clean or user says stop
 6. Summarize: what was fixed, what was dismissed (with reasons)
 
-**Never auto-resolve in interactive mode.** Every finding requires the user's explicit decision. Claude recommends — the user decides.
+**Never auto-resolve.** Every finding requires the user's explicit decision, regardless of how roborev was triggered. Claude recommends — the user decides.
 
 ### Auto mode
 
-Invoked with `/roborev auto`. Fixes everything without asking — but verifies first.
+Invoked **only** by an explicit `/roborev auto` from the user. Never assume auto mode for the pre-push gate, the PreToolUse unblock flow, or any other implicit trigger.
 
-1. Run `roborev show` to get the latest review
+1. Run `roborev show` to get the latest review and **show the raw output to the user** (see Display protocol)
 2. If no findings → report clean and stop
 3. Verify each claim before fixing (reviewer can be wrong — check exit codes, API behavior, docs)
 4. Fix all verified findings, commit, wait for re-review, repeat until clean
@@ -53,8 +67,10 @@ Invoked with `/roborev auto`. Fixes everything without asking — but verifies f
 
 ### Behavioral rules (both modes)
 
+- **Show before deciding** — the raw `roborev show` output goes to the user before any recommendation or fix
 - **Reflect and recommend** — for every finding, reason about which action best fits the project's architecture before presenting options
-- **Never auto-resolve in interactive mode** — every finding requires the user's explicit decision via `AskUserQuestion`
+- **Never auto-resolve unless explicitly in `/roborev auto`** — every finding requires the user's explicit decision via `AskUserQuestion` in interactive mode, and that mode is the default
+- **Pre-push gate is interactive** — running `roborev review --branch --agent claude-code` to satisfy the push gate does not authorize silent fix loops; surface findings, ask, then fix
 - **Never auto-dismiss** — only the user (interactive) or verified-wrong claims (auto) can dismiss
 - **Verify before fixing** — check the reviewer's technical claims before implementing
 - **Severity-first** — blockers before mediums before lows
@@ -138,6 +154,8 @@ Project-specific hard invariants for the reviewer.
 
 - Ignoring blocker-level findings
 - Recommending Dismiss on high-severity findings because "it's mitigated by convention"
-- Auto-resolving findings in interactive mode — every finding needs explicit user approval
+- Auto-resolving findings without an explicit `/roborev auto` from the user — every finding needs explicit user approval
+- Treating the pre-push gate (or any non-`/roborev auto` invocation) as license to silently fix and re-review
+- Summarizing findings without first showing the raw `roborev show` output — the user must see what the reviewer actually said before decisions are made
 - Presenting bare option lists without reasoning — always reflect and recommend
 - Running `roborev init` in a repo that already has `.roborev.toml` — use `install-hook` instead

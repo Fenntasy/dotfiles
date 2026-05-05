@@ -23,7 +23,7 @@
 ## Pushing
 
 - Never push directly to `main` or `master`
-- **Every push requires a roborev review** — run `roborev review --branch --agent claude-code` before pushing. Review findings with `/roborev`, fix or defer per user decision. This is not optional
+- **Every push requires a roborev review** — run `roborev review --branch --agent claude-code` before pushing. When the review completes, **show the raw `roborev show` output to the user**, then walk through findings with the user per `/roborev` (interactive). Never silently fix and re-review — the pre-push gate is not an authorization to auto-resolve. Fix or defer per user decision. This is not optional
 - **Roborev gate** — enforced by a PreToolUse hook on `git push` and `gh pr merge`. The hook blocks when: no reviews exist for the branch, reviews are still running/queued, or no `claude-code` review is `done`. If blocked, check status with `roborev list`
 - Fetch latest before pushing: `git fetch origin`
 - Rebase onto main if needed — check with `git merge-base --is-ancestor origin/main HEAD` (exit 0 = clean)
@@ -43,6 +43,10 @@
 - Use `Fixes #N` (auto-closes on merge) or `Addresses #N` (no auto-close) in the PR body
 - If work addresses something not yet tracked, create the issue before or at PR time
 - Branch names may include the issue number: `fix/42-shell-startup`
+
+## MR description (Norauto repos only)
+
+For projects under `~/Workspace/norauto/`, structure the MR body with these sections in order, each as a `##` heading: **Motivation and Context**, **Solution**, **Related Ticket** (Jira URL — create the ticket if none exists), **How Has This Been Tested?**, **Screenshots** (omit if not relevant), **Types of changes** (checkbox list: Chore / Bug fix / New feature / Breaking change).
 
 ## Merge strategy
 
