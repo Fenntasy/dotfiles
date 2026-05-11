@@ -43,3 +43,9 @@ When adding a new config file, place it here and run `rcup` to activate it.
 Rules in `claude/rules/` are global instructions loaded automatically for all projects. Skills in `claude/skills/` are loaded on demand (by file pattern or task intent) per the routing table in `claude/rules/skill-triggers.md`.
 
 When editing any file under `claude/` or `memory/`, load the `/claude-authoring` skill first.
+
+### Per-machine overrides
+
+`claude/settings.json` is shared across all machines (symlinked to `~/.claude/settings.json`). Machine-specific config — OTel telemetry, credentials helpers, anything tied to a single workstation — lives in `~/.claude/settings.local.json`, which is **not** symlinked from this repo and is not tracked anywhere. Claude Code merges `settings.local.json` on top of `settings.json`.
+
+To bootstrap a Norauto workstation: `cp ~/.claude/settings.local.norauto.example.json ~/.claude/settings.local.json` (after `rcup`). Personal machines leave the file absent — zero telemetry.
