@@ -1,5 +1,7 @@
 #!/bin/bash
-# Source: https://github.com/daniel3303/ClaudeCodeStatusLine
+# Forked from https://github.com/daniel3303/ClaudeCodeStatusLine — contains local
+# modifications (OAuth resolution, cache stampede lock, BSD/GNU date helpers,
+# builtin rate_limits path). Do not overwrite wholesale on upstream sync.
 # Layout: [extra] | [dir] | [tokens] | [effort] | [5h] | [7d] | [model] | [branch (stat)]
 
 set -f  # disable globbing
@@ -230,24 +232,24 @@ if $use_builtin; then
     fi
 fi
 
-if ! $effective_builtin; then
-    # Fetch fresh data if cache is stale (shared across all Claude Code instances to avoid rate limits)
-    if $needs_refresh; then
-        touch "$cache_file"  # stampede lock: prevent parallel panes from fetching simultaneously
-        token=$(get_oauth_token)
-        if [ -n "$token" ] && [ "$token" != "null" ]; then
-            response=$(curl -s --max-time 10 \
-                -H "Accept: application/json" \
-                -H "Content-Type: application/json" \
-                -H "Authorization: Bearer $token" \
-                -H "anthropic-beta: oauth-2025-04-20" \
-                -H "User-Agent: claude-code/2.1.34" \
-                "https://api.anthropic.com/api/oauth/usage" 2>/dev/null)
-            # Only cache valid usage responses (not error/rate-limit JSON)
-            if [ -n "$response" ] && echo "$response" | jq -e '.five_hour' >/dev/null 2>&1; then
-                usage_data="$response"
-                echo "$response" > "$cache_file"
-            fi
+# Always refresh from API when the cache is stale, even when the builtin path is
+# active. The API is the only source for extra_usage; gating it behind
+# !$effective_builtin meant extra_usage data never refreshed once builtin worked.
+if $needs_refresh; then
+    touch "$cache_file"  # stampede lock: prevent parallel panes from fetching simultaneously
+    token=$(get_oauth_token)
+    if [ -n "$token" ] && [ "$token" != "null" ]; then
+        response=$(curl -s --max-time 10 \
+            -H "Accept: application/json" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer $token" \
+            -H "anthropic-beta: oauth-2025-04-20" \
+            -H "User-Agent: claude-code/2.1.34" \
+            "https://api.anthropic.com/api/oauth/usage" 2>/dev/null)
+        # Only cache valid usage responses (not error/rate-limit JSON)
+        if [ -n "$response" ] && echo "$response" | jq -e '.five_hour' >/dev/null 2>&1; then
+            usage_data="$response"
+            echo "$response" > "$cache_file"
         fi
     fi
 fi
@@ -395,24 +397,9 @@ if $effective_builtin; then
         fi
     fi
 
-    # Cache builtin values so they're available as fallback when API is unavailable.
-    _fh_reset_json="null"
-    _fh_epoch=$(to_epoch "$builtin_five_hour_reset")
-    if [ -n "$_fh_epoch" ]; then
-        _fh_iso=$(date -u -r "$_fh_epoch" +"%Y-%m-%dT%H:%M:%SZ" 2>/dev/null || \
-                  date -u -d "@$_fh_epoch" +"%Y-%m-%dT%H:%M:%SZ" 2>/dev/null)
-        [ -n "$_fh_iso" ] && _fh_reset_json="\"$_fh_iso\""
-    fi
-    _sd_reset_json="null"
-    _sd_epoch=$(to_epoch "$builtin_seven_day_reset")
-    if [ -n "$_sd_epoch" ]; then
-        _sd_iso=$(date -u -r "$_sd_epoch" +"%Y-%m-%dT%H:%M:%SZ" 2>/dev/null || \
-                  date -u -d "@$_sd_epoch" +"%Y-%m-%dT%H:%M:%SZ" 2>/dev/null)
-        [ -n "$_sd_iso" ] && _sd_reset_json="\"$_sd_iso\""
-    fi
-    printf '{"five_hour":{"utilization":%s,"resets_at":%s},"seven_day":{"utilization":%s,"resets_at":%s}}' \
-        "${builtin_five_hour_pct:-0}" "$_fh_reset_json" \
-        "${builtin_seven_day_pct:-0}" "$_sd_reset_json" > "$cache_file" 2>/dev/null
+    # Cache is owned by the API path — never overwrite it from the builtin
+    # branch. Builtin gives accurate 5h/7d numbers but no extra_usage, and a
+    # partial overwrite previously erased the extra_usage segment for users.
 
 elif [ -n "$usage_data" ] && echo "$usage_data" | jq -e '.five_hour' >/dev/null 2>&1; then
     # ---- Extra ----

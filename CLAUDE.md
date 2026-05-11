@@ -48,4 +48,4 @@ When editing any file under `claude/` or `memory/`, load the `/claude-authoring`
 
 `claude/settings.json` is shared across all machines (symlinked to `~/.claude/settings.json`). Machine-specific config — OTel telemetry, credentials helpers, anything tied to a single workstation — lives in `~/.claude/settings.local.json`, which is **not** symlinked from this repo and is not tracked anywhere. Claude Code merges `settings.local.json` on top of `settings.json`.
 
-To bootstrap a Norauto workstation: `cp ~/.claude/settings.local.norauto.example.json ~/.claude/settings.local.json` (after `rcup`). Personal machines leave the file absent — zero telemetry.
+To bootstrap a Norauto workstation: `cp ~/.claude/settings.local.norauto.example.json ~/.claude/settings.local.json` (after `rcup`), then edit any absolute paths (e.g. `otelHeadersHelper`) to match your user. Personal machines leave the file absent — zero telemetry.
