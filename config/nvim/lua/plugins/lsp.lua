@@ -113,7 +113,6 @@ return { -- LSP Configuration & Plugins
       html = { filetypes = { 'html', 'twig', 'hbs' } },
       -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
       -- typescript_language_server = {},
-      eslint_lsp = {},
       lua_ls = {
         -- cmd = {...},
         -- filetypes { ...},
@@ -235,6 +234,11 @@ return { -- LSP Configuration & Plugins
     local ensure_installed = vim.tbl_keys(servers or {})
     vim.list_extend(ensure_installed, {
       'stylua', -- Used to format lua code
+      'prettier', -- Web/markup formatter (conform)
+      'eslint_d', -- JS/TS lint autofix (conform)
+      'shfmt', -- Shell formatter (conform)
+      'ruff', -- Python lint fixes + formatter (conform)
+      'checkmake', -- Makefile linter (nvim-lint)
     })
     require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
