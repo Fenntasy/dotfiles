@@ -69,12 +69,6 @@ return {
     config = function()
       require('lint').linters_by_ft = {
         make = { 'checkmake' },
-        -- In-buffer ESLint diagnostics, replacing the removed eslint_lsp.
-        -- nvim-lint's eslint_d returns nothing when no ESLint config exists.
-        javascript = { 'eslint_d' },
-        typescript = { 'eslint_d' },
-        javascriptreact = { 'eslint_d' },
-        typescriptreact = { 'eslint_d' },
       }
       local group = vim.api.nvim_create_augroup('nvim-lint', { clear = true })
       vim.api.nvim_create_autocmd({ 'BufWritePost', 'BufReadPost', 'InsertLeave' }, {
