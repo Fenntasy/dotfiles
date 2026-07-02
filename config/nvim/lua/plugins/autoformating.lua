@@ -36,13 +36,15 @@ return {
         -- eslint_d is not a conform built-in; defined here so lint autofixes
         -- still apply on save (as the old none-ls eslint_d formatter did).
         -- require_cwd skips it in projects without an ESLint config, where
-        -- eslint_d would exit nonzero and error every save.
+        -- eslint_d would exit nonzero and error every save. A config living
+        -- only in package.json#eslintConfig can't be detected by filename.
         eslint_d = {
           command = 'eslint_d',
           args = { '--fix-to-stdout', '--stdin', '--stdin-filename', '$FILENAME' },
           stdin = true,
           cwd = function(_, ctx)
             return vim.fs.root(ctx.dirname, {
+              '.eslintrc',
               '.eslintrc.js',
               '.eslintrc.cjs',
               '.eslintrc.json',
@@ -52,6 +54,8 @@ return {
               'eslint.config.mjs',
               'eslint.config.cjs',
               'eslint.config.ts',
+              'eslint.config.mts',
+              'eslint.config.cts',
             })
           end,
           require_cwd = true,
