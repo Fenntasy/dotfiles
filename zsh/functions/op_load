@@ -1,0 +1,16 @@
+op_load() {
+    local file="${1:-secrets.env}"
+
+    command -v op >/dev/null || { echo "op (1Password CLI) not installed" >&2; return 1; }
+    [[ -r "$file" ]] || { echo "op_load: cannot read $file" >&2; return 1; }
+    if ! op whoami >/dev/null 2>&1; then
+        local session
+        session=$(op signin) || { echo "op_load: sign-in failed" >&2; return 1; }
+        eval "$session"
+    fi
+
+    # Capture first so a failed op inject doesn't leave half-loaded env
+    local resolved
+    resolved=$(op inject -i "$file") || return $?
+    source /dev/stdin <<< "$resolved"
+}
