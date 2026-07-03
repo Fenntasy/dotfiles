@@ -12,5 +12,9 @@ op_load() {
     # Capture first so a failed op inject doesn't leave half-loaded env
     local resolved
     resolved=$(op inject -i "$file") || return $?
-    source /dev/stdin <<< "$resolved"
+    # allexport: plain KEY=value lines become environment variables; explicit
+    # `export` lines work the same. eval keeps the resolved secrets in memory
+    # (source with a here-string would write them to a temp file on disk).
+    setopt localoptions allexport
+    eval "$resolved"
 }
