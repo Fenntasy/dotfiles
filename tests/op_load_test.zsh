@@ -73,6 +73,9 @@ EOF
 # spaces or the CRLF ending out of the fixture
 printf 'TRAILING=op://vault/item/field   \n' >> "$work_dir/secrets.env"
 printf 'CRLF=op://vault/item/field\r\n' >> "$work_dir/secrets.env"
+# Plain final line: anchors the stdin-detachment proof independently of the
+# TRAILING/CRLF quirks above it
+printf 'SENTINEL=op://vault/item/field\n' >> "$work_dir/secrets.env"
 
 # --- Happy path: every reference lands in child-process environment ----------
 local out
@@ -90,6 +93,7 @@ out=$(cd "$work_dir" && PATH="$work_dir/bin:$PATH" zsh -f -c '
   print "crlf=$(printenv CRLF)"
   print "literal=$(printenv LITERAL)"
   print "glob=$(printenv GLOB)"
+  print "sentinel=$(printenv SENTINEL)"
   [[ -o extendedglob ]] && print "OPTION_LEAK"
 ')
 [[ "$out" == *"plain=RESOLVED_SECRET"* ]] \
@@ -125,9 +129,10 @@ out=$(cd "$work_dir" && PATH="$work_dir/bin:$PATH" zsh -f -c '
   && pass "CRLF line ending stripped from ref" \
   || fail "CRLF broke the resolve: $out"
 
-# The mock swallows stdin on every read; reaching the last template line
-# proves op_load detaches stdin (`</dev/null`) so op can't eat lines.
-[[ "$out" == *"crlf=RESOLVED_SECRET"* ]] \
+# The mock swallows stdin on every read; the sentinel is the last template
+# line, so it resolving proves op_load detaches stdin (`</dev/null`) —
+# otherwise op would have eaten every line after the first read.
+[[ "$out" == *"sentinel=RESOLVED_SECRET"* ]] \
   && pass "op read cannot consume remaining template lines" \
   || fail "stdin inherited: op consumed template lines"
 
