@@ -113,7 +113,6 @@ return { -- LSP Configuration & Plugins
       html = { filetypes = { 'html', 'twig', 'hbs' } },
       -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
       -- typescript_language_server = {},
-      eslint_lsp = {},
       lua_ls = {
         -- cmd = {...},
         -- filetypes { ...},
@@ -174,42 +173,19 @@ return { -- LSP Configuration & Plugins
       --     },
       --   },
       -- },
-      ruff = {
-        -- Notes on code actions: https://github.com/astral-sh/ruff-lsp/issues/119#issuecomment-1595628355
-        -- Get isort like behavior: https://github.com/astral-sh/ruff/issues/8926#issuecomment-1834048218
-        commands = {
-          RuffAutofix = {
-            function()
-              vim.lsp.buf.execute_command {
-                command = 'ruff.applyAutofix',
-                arguments = {
-                  { uri = vim.uri_from_bufnr(0) },
-                },
-              }
-            end,
-            description = 'Ruff: Fix all auto-fixable problems',
-          },
-          RuffOrganizeImports = {
-            function()
-              vim.lsp.buf.execute_command {
-                command = 'ruff.applyOrganizeImports',
-                arguments = {
-                  { uri = vim.uri_from_bufnr(0) },
-                },
-              }
-            end,
-            description = 'Ruff: Format imports',
-          },
-        },
-      },
+      -- Autofix and import sorting run through conform on save; the LSP
+      -- provides diagnostics and code actions.
+      ruff = {},
       rust_analyzer = {
-        ['rust-analyzer'] = {
-          cargo = {
-            features = 'all',
-          },
-          checkOnSave = true,
-          check = {
-            command = 'clippy',
+        settings = {
+          ['rust-analyzer'] = {
+            cargo = {
+              features = 'all',
+            },
+            checkOnSave = true,
+            check = {
+              command = 'clippy',
+            },
           },
         },
       },
@@ -235,19 +211,26 @@ return { -- LSP Configuration & Plugins
     local ensure_installed = vim.tbl_keys(servers or {})
     vim.list_extend(ensure_installed, {
       'stylua', -- Used to format lua code
+      'prettier', -- Web/markup formatter (conform)
+      'eslint_d', -- JS/TS lint autofix (conform)
+      'shfmt', -- Shell formatter (conform)
+      'ruff', -- Python lint fixes + formatter (conform)
+      'checkmake', -- Makefile linter (nvim-lint)
     })
     require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
+    -- mason-lspconfig v2 removed the handlers API: it enables every
+    -- installed server through vim.lsp.enable, and per-server options must
+    -- be registered up front with vim.lsp.config.
+    vim.lsp.config('*', { capabilities = capabilities })
+    for server_name, config in pairs(servers) do
+      vim.lsp.config(server_name, config)
+    end
     require('mason-lspconfig').setup {
-      handlers = {
-        function(server_name)
-          local server = servers[server_name] or {}
-          -- This handles overriding only values explicitly passed
-          -- by the server configuration above. Useful when disabling
-          -- certain features of an LSP (for example, turning off formatting for tsserver)
-          server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
-          require('lspconfig')[server_name].setup(server)
-        end,
+      automatic_enable = {
+        -- stylua is a formatter (run by conform); its Mason package maps to
+        -- a `stylua --lsp` server config that stylua 2.0 doesn't support.
+        exclude = { 'stylua' },
       },
     }
   end,
