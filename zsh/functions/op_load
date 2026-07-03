@@ -12,9 +12,25 @@ op_load() {
     # Capture first so a failed op inject doesn't leave half-loaded env
     local resolved
     resolved=$(op inject -i "$file") || return $?
-    # allexport: plain KEY=value lines become environment variables; explicit
-    # `export` lines work the same. eval keeps the resolved secrets in memory
-    # (source with a here-string would write them to a temp file on disk).
-    setopt localoptions allexport
-    eval "$resolved"
+    # Parse assignments instead of eval/source: op inject substitutes vault
+    # values verbatim, so evaluating them as shell code would let a value
+    # containing $(...) or backticks execute in this shell.
+    setopt localoptions extendedglob
+    local line key value
+    for line in ${(f)resolved}; do
+        [[ "$line" == [[:space:]]#(\#*|) ]] && continue
+        line="${line##[[:space:]]#}"
+        line="${line#export[[:space:]]##}"
+        key="${line%%=*}"
+        value="${line#*=}"
+        if [[ "$key" != [A-Za-z_][A-Za-z0-9_]# || "$line" != *=* ]]; then
+            echo "op_load: skipping malformed line: ${line%%=*}" >&2
+            continue
+        fi
+        # Strip one pair of matching surrounding quotes, as dotenv files do
+        if [[ "$value" == \"*\" || "$value" == \'*\' ]]; then
+            value="${value[2,-2]}"
+        fi
+        export "$key"="$value"
+    done
 }
