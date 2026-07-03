@@ -9,13 +9,14 @@ op_load() {
         eval "$session"
     fi
 
-    # Resolve each reference with `op read` rather than evaluating `op inject`
-    # output: only the template we wrote is ever parsed, so resolved values
-    # can't smuggle in shell code or extra assignments, and multi-line
-    # secrets survive intact. Template lines must be KEY=op://ref (an
-    # `export ` prefix and quotes around the ref are tolerated).
+    # Parse the template ourselves rather than evaluating `op inject` output:
+    # values are never run through the shell parser, so a vault value can't
+    # smuggle in shell code or extra assignments, and multi-line secrets
+    # survive intact. Template lines are dotenv-style KEY=value (an `export `
+    # prefix and quotes around the value are tolerated): an op://ref value is
+    # resolved with `op read`, anything else is exported literally.
     setopt localoptions extendedglob
-    local line key ref value
+    local line key value
     local -i lineno=0
     local -a keys values
     while IFS= read -r line || [[ -n "$line" ]]; do
@@ -24,19 +25,25 @@ op_load() {
         line="${line##[[:space:]]#}"
         line="${line#export[[:space:]]##}"
         key="${line%%=*}"
-        ref="${line#*=}"
-        if [[ "$ref" == \"*\" || "$ref" == \'*\' ]]; then
-            ref="${ref[2,-2]}"
+        value="${line#*=}"
+        # Trailing whitespace / CRLF is template noise; strip before the
+        # quotes so spaces inside a quoted value are preserved.
+        value="${value%%[[:space:]$'\r']#}"
+        if [[ "$value" == \"*\" || "$value" == \'*\' ]]; then
+            value="${value[2,-2]}"
         fi
         # Only a line number in the warning — echoing content could print
         # secret material to stderr.
-        if [[ "$line" != *=* || "$key" != [A-Za-z_][A-Za-z0-9_]# || "$ref" != op://* ]]; then
-            echo "op_load: skipping malformed line $lineno (expected KEY=op://ref)" >&2
+        if [[ "$line" != *=* || "$key" != [A-Za-z_][A-Za-z0-9_]# ]]; then
+            echo "op_load: skipping malformed line $lineno (expected KEY=value)" >&2
             continue
         fi
         # Resolve everything before exporting anything, so a failed read
-        # doesn't leave a half-loaded environment.
-        value=$(op read "$ref") || { echo "op_load: failed to resolve line $lineno" >&2; return 1; }
+        # doesn't leave a half-loaded environment. stdin is detached so an
+        # op prompt can't consume the remaining template lines.
+        if [[ "$value" == op://* ]]; then
+            value=$(op read "$value" </dev/null) || { echo "op_load: failed to resolve line $lineno" >&2; return 1; }
+        fi
         keys+=("$key")
         values+=("$value")
     done < "$file"

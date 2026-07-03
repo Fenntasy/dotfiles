@@ -31,6 +31,10 @@ cat > "$work_dir/bin/op" <<EOF
 case "\$1" in
   whoami) exit 0 ;;
   read)
+    # Swallow stdin, like a prompting op would: if op_load ever lets op
+    # inherit the template file as stdin, this eats every remaining line
+    # and the assertions below fail.
+    cat > /dev/null
     case "\$2" in
       op://vault/item/field) echo "RESOLVED_SECRET" ;;
       op://vault/item/evil) echo '\$(touch $work_dir/pwned) \`touch $work_dir/pwned\`; touch $work_dir/pwned' ;;
@@ -49,7 +53,10 @@ chmod +x "$work_dir/bin/op"
 # - hostile vault value            -> stored literally, never executed
 # - value with spaces              -> preserved whole
 # - multi-line value (PEM-style)   -> exported intact, not truncated
-# - line that isn't KEY=op://ref   -> skipped; warning shows line number only
+# - literal (non-op://) values     -> exported as-is, never resolved
+# - quoted glob literal '*'        -> exported verbatim, never expanded
+# - trailing spaces / CRLF ending  -> stripped before resolving
+# - line without =                 -> skipped; warning shows line number only
 cat > "$work_dir/secrets.env" <<'EOF'
 PLAIN_VAR=op://vault/item/field
 export EXPORTED_VAR="op://vault/item/field"
@@ -58,8 +65,14 @@ export EXPORTED_VAR="op://vault/item/field"
 EVIL_VAR=op://vault/item/evil
 SPACED=op://vault/item/spaces
 MULTI=op://vault/item/multiline
-LITERAL=super-sensitive-not-a-ref
+LITERAL=plain-literal
+export GLOB='*'
+malformed super-sensitive line no equals
 EOF
+# Appended via printf so editors can't silently normalize the trailing
+# spaces or the CRLF ending out of the fixture
+printf 'TRAILING=op://vault/item/field   \n' >> "$work_dir/secrets.env"
+printf 'CRLF=op://vault/item/field\r\n' >> "$work_dir/secrets.env"
 
 # --- Happy path: every reference lands in child-process environment ----------
 local out
@@ -73,7 +86,10 @@ out=$(cd "$work_dir" && PATH="$work_dir/bin:$PATH" zsh -f -c '
   print "spaced=$(printenv SPACED)"
   print "evil=$(printenv EVIL_VAR)"
   print "multilines=$(( $(printenv MULTI | wc -l) ))"
-  print "literal=${LITERAL:-unset}"
+  print "trailing=$(printenv TRAILING)"
+  print "crlf=$(printenv CRLF)"
+  print "literal=$(printenv LITERAL)"
+  print "glob=$(printenv GLOB)"
   [[ -o extendedglob ]] && print "OPTION_LEAK"
 ')
 [[ "$out" == *"plain=RESOLVED_SECRET"* ]] \
@@ -101,10 +117,30 @@ out=$(cd "$work_dir" && PATH="$work_dir/bin:$PATH" zsh -f -c '
   && pass "multi-line secret exported intact" \
   || fail "multi-line secret truncated: $out"
 
-# A non-reference line must be skipped, not exported.
-[[ "$out" == *"literal=unset"* ]] \
-  && pass "non-reference line not exported" \
-  || fail "literal line leaked into environment: $out"
+# Trailing spaces and CRLF endings are template noise, not part of the ref.
+[[ "$out" == *"trailing=RESOLVED_SECRET"* ]] \
+  && pass "trailing whitespace stripped from ref" \
+  || fail "trailing whitespace broke the resolve: $out"
+[[ "$out" == *"crlf=RESOLVED_SECRET"* ]] \
+  && pass "CRLF line ending stripped from ref" \
+  || fail "CRLF broke the resolve: $out"
+
+# The mock swallows stdin on every read; reaching the last template line
+# proves op_load detaches stdin (`</dev/null`) so op can't eat lines.
+[[ "$out" == *"crlf=RESOLVED_SECRET"* ]] \
+  && pass "op read cannot consume remaining template lines" \
+  || fail "stdin inherited: op consumed template lines"
+
+# Literal (non-op://) values are exported as-is, like op inject passed
+# them through — real templates mix references with plain settings.
+[[ "$out" == *"literal=plain-literal"* ]] \
+  && pass "literal value exported without resolving" \
+  || fail "literal value mishandled: $out"
+# A quoted glob must land verbatim: proves values are never re-parsed
+# by the shell (no expansion), quotes stripped once.
+[[ "$out" == *"glob=*"* ]] \
+  && pass "quoted glob literal exported unexpanded" \
+  || fail "glob literal expanded or mangled: $out"
 
 # op_load sets extendedglob for its own parsing only.
 [[ "$out" != *"OPTION_LEAK"* ]] \
@@ -116,7 +152,7 @@ out=$(cd "$work_dir" && PATH="$work_dir/bin:$PATH" zsh -f -c '
   source "'"$repo_root"'/zsh/functions/op_load"
   op_load secrets.env 2>&1 >/dev/null
 ')
-[[ "$out" == *"skipping malformed line 8"* ]] \
+[[ "$out" == *"skipping malformed line 10"* ]] \
   && pass "malformed line warned with its line number" \
   || fail "no line-numbered warning: $out"
 [[ "$out" != *"super-sensitive"* ]] \
