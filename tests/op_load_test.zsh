@@ -73,8 +73,9 @@ EOF
 # spaces or the CRLF ending out of the fixture
 printf 'TRAILING=op://vault/item/field   \n' >> "$work_dir/secrets.env"
 printf 'CRLF=op://vault/item/field\r\n' >> "$work_dir/secrets.env"
-# Plain final line: anchors the stdin-detachment proof independently of the
-# TRAILING/CRLF quirks above it
+# Plain final line for the stdin-detachment proof: it has no whitespace or
+# CRLF quirks of its own (though a failed resolve anywhere still aborts the
+# whole load, since op_load exports atomically)
 printf 'SENTINEL=op://vault/item/field\n' >> "$work_dir/secrets.env"
 
 # --- Happy path: every reference lands in child-process environment ----------
