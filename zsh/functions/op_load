@@ -1,7 +1,7 @@
 op_load() {
     local file="${1:-secrets.env}"
 
-    command -v op >/dev/null || { echo "op (1Password CLI) not installed" >&2; return 1; }
+    command -v op >/dev/null || { echo "op_load: op (1Password CLI) not installed" >&2; return 1; }
     [[ -r "$file" ]] || { echo "op_load: cannot read $file" >&2; return 1; }
     if ! op whoami >/dev/null 2>&1; then
         local session
@@ -9,28 +9,40 @@ op_load() {
         eval "$session"
     fi
 
-    # Capture first so a failed op inject doesn't leave half-loaded env
-    local resolved
-    resolved=$(op inject -i "$file") || return $?
-    # Parse assignments instead of eval/source: op inject substitutes vault
-    # values verbatim, so evaluating them as shell code would let a value
-    # containing $(...) or backticks execute in this shell.
+    # Resolve each reference with `op read` rather than evaluating `op inject`
+    # output: only the template we wrote is ever parsed, so resolved values
+    # can't smuggle in shell code or extra assignments, and multi-line
+    # secrets survive intact. Template lines must be KEY=op://ref (an
+    # `export ` prefix and quotes around the ref are tolerated).
     setopt localoptions extendedglob
-    local line key value
-    for line in ${(f)resolved}; do
+    local line key ref value
+    local -i lineno=0
+    local -a keys values
+    while IFS= read -r line || [[ -n "$line" ]]; do
+        (( lineno++ ))
         [[ "$line" == [[:space:]]#(\#*|) ]] && continue
         line="${line##[[:space:]]#}"
         line="${line#export[[:space:]]##}"
         key="${line%%=*}"
-        value="${line#*=}"
-        if [[ "$key" != [A-Za-z_][A-Za-z0-9_]# || "$line" != *=* ]]; then
-            echo "op_load: skipping malformed line: ${line%%=*}" >&2
+        ref="${line#*=}"
+        if [[ "$ref" == \"*\" || "$ref" == \'*\' ]]; then
+            ref="${ref[2,-2]}"
+        fi
+        # Only a line number in the warning — echoing content could print
+        # secret material to stderr.
+        if [[ "$line" != *=* || "$key" != [A-Za-z_][A-Za-z0-9_]# || "$ref" != op://* ]]; then
+            echo "op_load: skipping malformed line $lineno (expected KEY=op://ref)" >&2
             continue
         fi
-        # Strip one pair of matching surrounding quotes, as dotenv files do
-        if [[ "$value" == \"*\" || "$value" == \'*\' ]]; then
-            value="${value[2,-2]}"
-        fi
-        export "$key"="$value"
+        # Resolve everything before exporting anything, so a failed read
+        # doesn't leave a half-loaded environment.
+        value=$(op read "$ref") || { echo "op_load: failed to resolve line $lineno" >&2; return 1; }
+        keys+=("$key")
+        values+=("$value")
+    done < "$file"
+
+    local -i i
+    for (( i = 1; i <= $#keys; i++ )); do
+        export "${keys[i]}"="${values[i]}"
     done
 }
