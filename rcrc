@@ -1,2 +1,2 @@
-EXCLUDES="README.md utils zshrc.secrets"
+EXCLUDES="README.md utils tests zshrc.secrets"
 DOTFILES_DIRS="${HOME}/.dotfiles"

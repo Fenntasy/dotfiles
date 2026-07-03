@@ -1,0 +1,55 @@
+op_load() {
+    local file="${1:-secrets.env}"
+
+    command -v op >/dev/null || { echo "op_load: op (1Password CLI) not installed" >&2; return 1; }
+    [[ -r "$file" ]] || { echo "op_load: cannot read $file" >&2; return 1; }
+    if ! op whoami >/dev/null 2>&1; then
+        local session
+        session=$(op signin) || { echo "op_load: sign-in failed" >&2; return 1; }
+        eval "$session"
+    fi
+
+    # Parse the template ourselves rather than evaluating `op inject` output:
+    # values are never run through the shell parser, so a vault value can't
+    # smuggle in shell code or extra assignments, and multi-line secrets
+    # survive intact. Template lines are dotenv-style KEY=value (an `export `
+    # prefix and quotes around the value are tolerated): an op://ref value is
+    # resolved with `op read`, anything else is exported literally.
+    setopt localoptions extendedglob
+    local line key value
+    local -i lineno=0
+    local -a keys values
+    while IFS= read -r line || [[ -n "$line" ]]; do
+        (( lineno++ ))
+        [[ "$line" == [[:space:]]#(\#*|) ]] && continue
+        line="${line##[[:space:]]#}"
+        line="${line#export[[:space:]]##}"
+        key="${line%%=*}"
+        value="${line#*=}"
+        # Trailing whitespace / CRLF is template noise; strip before the
+        # quotes so spaces inside a quoted value are preserved.
+        value="${value%%[[:space:]$'\r']#}"
+        if [[ "$value" == \"*\" || "$value" == \'*\' ]]; then
+            value="${value[2,-2]}"
+        fi
+        # Only a line number in the warning — echoing content could print
+        # secret material to stderr.
+        if [[ "$line" != *=* || "$key" != [A-Za-z_][A-Za-z0-9_]# ]]; then
+            echo "op_load: skipping malformed line $lineno (expected KEY=value)" >&2
+            continue
+        fi
+        # Resolve everything before exporting anything, so a failed read
+        # doesn't leave a half-loaded environment. stdin is detached so an
+        # op prompt can't consume the remaining template lines.
+        if [[ "$value" == op://* ]]; then
+            value=$(op read "$value" </dev/null) || { echo "op_load: failed to resolve line $lineno" >&2; return 1; }
+        fi
+        keys+=("$key")
+        values+=("$value")
+    done < "$file"
+
+    local -i i
+    for (( i = 1; i <= $#keys; i++ )); do
+        export "${keys[i]}"="${values[i]}"
+    done
+}
