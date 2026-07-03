@@ -3,6 +3,10 @@
 
 # Inserts a blank line between shell prompts
 add_newline = true
+
+# node --version takes ~300ms on this machine (mise-managed node), which
+# crosses the 500ms default under load and spams timeout warnings
+command_timeout = 2000
 format = """$cmd_duration\
 $directory$hostname$localip$shlvl$shell$env_var$jobs$sudo$username\
 $git_branch$git_commit$git_state$git_status\
