@@ -52,6 +52,9 @@ One concern per issue. If an issue covers two unrelated changes, split it. Multi
 ### Test plan
 
 - Verifiable actions: "Run `just api-test`", not vague "Tests pass"
+- Every item must be checkable **before** merge — never add items that can
+  only be verified after merging (post-deploy smoke checks go in the issue
+  or a follow-up, not the PR checklist)
 - Unchecked `[ ]` = pending, checked `[x]` = verified
 - Never merge with unchecked items — remove with explanation or verify first
 
