@@ -1,5 +1,10 @@
 # Secrets
 
+## Provisioning
+
+- Never fetch, load, or manage secrets from any store (1Password / `op` CLI, vaults, keychains) — not even to unblock a task
+- When a command needs a credential, name the environment variable the user should set and stop; the user provisions it themselves
+
 ## Secrets in code
 
 - Never commit credentials, tokens, API keys, or secrets to any repository
