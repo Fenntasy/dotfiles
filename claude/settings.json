@@ -28,5 +28,6 @@
       }
     }
   },
-  "theme": "light"
+  "theme": "light",
+  "skipAutoPermissionPrompt": true
 }
