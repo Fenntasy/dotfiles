@@ -28,6 +28,5 @@
       }
     }
   },
-  "theme": "light",
-  "skipAutoPermissionPrompt": true
+  "theme": "light"
 }
