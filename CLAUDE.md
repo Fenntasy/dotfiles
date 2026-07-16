@@ -33,7 +33,7 @@ When adding a new config file, place it here and run `rcup` to activate it.
 | `gitconfig` | Git identity, aliases, SSH signing via 1Password (`op-ssh-sign`) |
 | `config/nvim/` | Neovim (Lua, lazy.nvim plugin manager) |
 | `config/alacritty/` | Alacritty terminal config |
-| `bin/` | Executable scripts symlinked to `~/bin/` |
+| `bin/` | Executable scripts symlinked to `~/.bin/` |
 | `claude/` | Claude Code rules and skills (see below) |
 | `Brewfile` | Homebrew packages, casks, VS Code extensions, Mac App Store apps |
 | `utils/` | Static resources (iTerm colors, icons) — not symlinked |
