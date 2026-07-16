@@ -24,7 +24,9 @@ while :; do
   sleep 10
 done
 
-job="$(roborev list 2>/dev/null | awk 'NR==2 {print $1}')"
+# Reuse the loop's captured output — a second roborev call could fail
+# silently under pipefail, against the abort-loudly principle above
+job="$(awk 'NR==2 {print $1}' <<<"$out")"
 if [[ -z "$job" ]]; then
   echo "roborev-wait: no reviews found for this branch" >&2
   exit 1
