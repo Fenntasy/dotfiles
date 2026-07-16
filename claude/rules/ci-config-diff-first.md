@@ -14,6 +14,10 @@ Pipeline templates and GitOps values files have high blast radius (a bad
 merge deploys, a bad rule silently skips CI) and the user regularly wants to
 steer these edits before they land.
 
+The `templates/` globs above overmatch (Helm charts, email templates): this
+rule only applies when the file being edited is a pipeline definition or
+GitOps values file — ignore it for unrelated templates.
+
 ## Rules
 
 - **Show the proposed change as a diff in chat before applying it** to CI
