@@ -17,7 +17,7 @@
 - Never add "Generated with Claude Code" or similar footers to PRs
 - Use conventional commit format: `type(scope): description`
   - `feat`, `fix`, `refactor`, `test`, `docs`, `chore`, `ci`, `perf`
-- Keep the first line under 72 characters
+- Keep the first line under 72 characters; wrap body lines at 80
 - Only commit when explicitly asked
 
 ## Pushing

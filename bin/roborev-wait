@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+# Poll roborev until no review is running or queued, then print the latest
+# review. Replaces the ad-hoc `while true; do roborev list...` loops.
+#
+# Usage: roborev-wait [timeout_seconds]   (default 900)
+set -euo pipefail
+
+timeout="${1:-900}"
+[[ "$timeout" =~ ^[0-9]+$ ]] || { echo "usage: roborev-wait [timeout_seconds]" >&2; exit 2; }
+start="$(date +%s)"
+
+while :; do
+  # A failing roborev must abort loudly — swallowing it would make a dead
+  # daemon indistinguishable from "all reviews finished"
+  out="$(roborev list)" || { echo "roborev-wait: roborev list failed" >&2; exit 1; }
+  if ! grep -qE '\b(running|queued)\b' <<<"$out"; then
+    break
+  fi
+  if (( $(date +%s) - start > timeout )); then
+    echo "roborev-wait: still running after ${timeout}s" >&2
+    echo "$out" >&2
+    exit 1
+  fi
+  sleep 10
+done
+
+# Reuse the loop's captured output — a second roborev call could fail
+# silently under pipefail, against the abort-loudly principle above
+job="$(awk 'NR==2 {print $1}' <<<"$out")"
+if [[ -z "$job" ]]; then
+  echo "roborev-wait: no reviews found for this branch" >&2
+  exit 1
+fi
+roborev show "$job" --job

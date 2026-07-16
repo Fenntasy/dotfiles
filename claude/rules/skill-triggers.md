@@ -34,6 +34,7 @@ When the user's request matches an intent below, invoke the skill before startin
 | `/project-audit`    | Comprehensive project health audit             | "full audit", "audit the project", "check for drift", "are our rules still accurate" |
 | `/frontend-design`  | Designing new pages, components, or visual UI  | "design this page", "make it look good", "style this", "new page UI", "visual direction" |
 | `/roborev`          | Code review workflow, fixing findings, pre-push | "roborev", "review findings", "fix findings", "review before push"                   |
+| `/ship`             | Deliver finished work: commit → review → push → MR/PR | "ship", "commit and review", "push and MR", "the usual routine", "let's commit" |
 | `/nvim-config`      | Questions about the user's Neovim config        | "shortcut for", "how did I", "which LSP", "vim config", "neovim", "keymap for"       |
 
 ## Composite workflows
