@@ -39,9 +39,11 @@ The single most important mindset shift: **loaders are the cache**. There is no 
 Loaders run on the server before render. Return plain objects — access via `useLoaderData`:
 
 ```tsx
+import { data } from "react-router";
+
 export async function loader({ request, params }: LoaderFunctionArgs) {
   const id = params.id;
-  if (!id) throw new Response("Not Found", { status: 404 });
+  if (!id) throw data(null, { status: 404 });
   const resource = await api.getResource(id);
   return { resource };
 }
@@ -57,11 +59,51 @@ export default function ResourcePage() {
 - **Loaders are the cache** — no client-side data layer on top
 - **Never copy server data into `useState`** — `useLoaderData` is the source of truth
 - Loaders auto-rerun after successful actions — never invalidate manually
-- Throw `Response` on error to trigger the route's `ErrorBoundary`:
-  ```ts
-  throw new Response("Not Found", { status: 404 });
-  ```
+- Throw `data(...)` to trigger `ErrorBoundary` — **not** `throw new Response(body, ...)`, which returns the body to the browser as a deliberate response (see "Triggering ErrorBoundary from a loader" below)
 - Use URL search params for data variations (filters, sort, pagination) — loaders re-run when the URL changes
+
+### Triggering `ErrorBoundary` from a loader
+
+Surface-level "throw to trigger the error boundary" patterns look equivalent but behave very differently. Pick the right one or your 404 page renders as plain text.
+
+| Pattern | Behavior | When to use |
+|---|---|---|
+| `throw data(null, { status: 404 })` | Triggers `ErrorBoundary`. `useRouteError()` receives an `ErrorResponse` matching `isRouteErrorResponse(error)`. | Almost always — "render a 404/403/500 page." |
+| `throw new Response(body, { status })` | RR returns the Response **directly to the browser** as the HTTP response. The body is what the user sees — `ErrorBoundary` does NOT render. | Deliberate non-document responses (file downloads, custom JSON for an API consumer). Pass a body, not `null`. |
+| `throw redirect(url)` | Returns a redirect Response directly. | Redirects from loaders/actions. |
+| `throw new Error("...")` | Triggers `ErrorBoundary` with status 500. `useRouteError()` receives the `Error`. | Unexpected programming errors — usually network/parse failures that crash a loader. |
+
+**Hidden requirement: a default component is mandatory.** Even with `throw data(...)`, if a route module exports only `loader` and no `default`, RR treats it as **data-only** and serializes the thrown value as JSON instead of rendering the `ErrorBoundary` document. This bites catch-all 404 routes hardest, where the loader always throws and the component "feels" pointless:
+
+```ts
+// WRONG — data-only route, browser receives `null` as JSON, not the
+// rendered 404 page. No default export → no document render path.
+import { data } from "react-router";
+
+export async function loader() {
+  throw data(null, { status: 404 });
+}
+```
+
+```ts
+// CORRECT — default component required, even when it never executes.
+import { data } from "react-router";
+
+export async function loader() {
+  throw data(null, { status: 404 });
+}
+
+export default function NotFound() {
+  return null; // never runs; loader always throws
+}
+```
+
+**Catch-all routes for true 404s.** Without a `*` route, RR throws `"No route matches URL"` *before* any loader runs — meaning the root loader never executes, root data is missing from router state, and SSR-level concerns that depend on root loader data (e.g. CSP nonces, theme tokens, request-scoped values) are absent on the 404 page. Add an explicit catch-all so the loader chain always runs:
+
+```ts
+// app/routes.ts
+route("*", "routes/not-found.ts"),
+```
 
 ---
 
@@ -337,7 +379,99 @@ try {
 
 ---
 
-## 8. Anti-Patterns
+## 8. Layout Routes for Tabbed Pages
+
+When a page has distinct sections or tabs, use a layout route with `<Outlet />` and child routes — not query params or client-side tab state. Each section becomes its own route with its own loader, keeping data fetching isolated and giving you browser history, deep links, and independent loading for free.
+
+### Route config
+
+```ts
+// routes.ts
+layout("routes/orders.tsx", [
+  route("/orders", "routes/orders._index.tsx"),           // default tab
+  route("/orders/returns", "routes/orders.returns.tsx"),
+  route("/orders/analytics", "routes/orders.analytics.tsx"),
+]),
+```
+
+### Layout route — shared chrome + `<Outlet />`
+
+The layout provides the heading, tab navigation, and renders the active child:
+
+```tsx
+// routes/orders.tsx
+import { NavLink, Outlet } from "react-router";
+
+export default function OrdersLayout() {
+  const tabClass = (isActive: boolean) =>
+    `px-3 py-1.5 rounded text-sm font-medium ${
+      isActive ? "bg-primary text-white" : "bg-gray-100 text-gray-700"
+    }`;
+
+  return (
+    <div>
+      <h1>Orders</h1>
+      <nav className="flex gap-2 mb-6">
+        <NavLink to="/orders" end className={({ isActive }) => tabClass(isActive)}>
+          All orders
+        </NavLink>
+        <NavLink to="/orders/returns" className={({ isActive }) => tabClass(isActive)}>
+          Returns
+        </NavLink>
+        <NavLink to="/orders/analytics" className={({ isActive }) => tabClass(isActive)}>
+          Analytics
+        </NavLink>
+      </nav>
+      <Outlet />
+    </div>
+  );
+}
+```
+
+### Child routes — isolated loaders
+
+Each child route fetches only the data it needs:
+
+```tsx
+// routes/orders._index.tsx — paginated order list
+export async function loader({ request }: LoaderFunctionArgs) {
+  const url = new URL(request.url);
+  const page = Math.max(1, parseInt(url.searchParams.get("page") ?? "1", 10) || 1);
+  const { rows, total } = await listOrders(page);
+  return { rows, total, page };
+}
+
+// routes/orders.returns.tsx — return requests with action
+export async function loader({ request }: LoaderFunctionArgs) {
+  const { rows, total } = await listReturns();
+  return { rows, total };
+}
+
+export async function action({ request }: ActionFunctionArgs) {
+  const formData = await request.formData();
+  // handle return approval/rejection
+}
+
+// routes/orders.analytics.tsx — stats only, no action
+export async function loader() {
+  const stats = await getOrderStats(30);
+  return { stats };
+}
+```
+
+### Why not query params or `useState`?
+
+- **Query params** (`?tab=returns`) load all tab data in a single loader, wasting DB queries for invisible tabs
+- **`useState`** loses the active tab on refresh, isn't bookmarkable, and forces conditional rendering in one large component
+- **Subroutes** give each tab its own loader (fetches only what's visible), its own action, proper browser back/forward, and deep-linkable URLs
+
+### When query params are still right
+
+Use `useSearchParams` for variations *within* a single view — filters, sort order, pagination. These modify what the current loader returns, not which view is active. If switching between the options would require a fundamentally different loader or action, it should be a subroute.
+
+---
+
+## 9. Anti-Patterns
 
 ### SPA-era patterns — never use with React Router v7
 
@@ -355,6 +489,8 @@ These patterns belong to the SPA era where the client managed its own data. In a
 | `useEffect` to sync action results      | Extra render cycle, stale values                                                   | `useActionData()` directly                     |
 | Zustand/Redux for server data           | Wrong tool — these are for client-only state                                       | Loaders own server data                        |
 | Throwing from actions for user errors   | Triggers ErrorBoundary, loses form state                                           | `data({ error })` from `react-router`          |
+| `throw new Response("text", { status })` from a loader expecting ErrorBoundary | Body is returned directly to the browser; ErrorBoundary never renders | `throw data(null, { status })` (and ensure the route has a `default` export) |
+| Loader-only route module without a `default` export | RR treats it as data-only and serializes thrown values as JSON | Add `export default function () { return null }` even when the loader always throws |
 | `Response.json()` in actions            | Breaks `useActionData` inference when action also redirects (collapses to `never`) | `data()` from `react-router`                   |
 | Copying `useLoaderData` into `useState` | Two sources of truth, stale data                                                   | Use `useLoaderData` directly                   |
 | `useState` for filters/pagination       | Not shareable, lost on navigation                                                  | `useSearchParams`                              |
