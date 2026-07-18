@@ -22,8 +22,8 @@
 
 - Never log passwords, tokens, API keys, or secrets
 - Never log full request/response bodies
-- Never log PII (email addresses, names in non-debug contexts)
 - Never log database connection strings
+- For PII masking in logs (emails, names, phones) see `claude/rules/pii-logging.md`
 
 ## Sensitive files
 
