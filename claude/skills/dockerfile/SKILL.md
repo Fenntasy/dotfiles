@@ -50,9 +50,9 @@ This is the foundational decision — it drives attack surface, build reliabilit
 | `distroless/cc`     | ~20–25 MiB  | glibc + libstdc++ | none            | Rust (glibc), C/C++                                     |
 | `alpine`            | ~5–7 MiB    | **musl**          | yes             | Need a shell / pkg mgr, and no glibc-linked native deps |
 | `debian:*-slim`     | ~74–80 MiB  | glibc             | yes             | Prebuilt native artifacts, `apt` at build time          |
-| `ubuntu:*`          | ~77 MB      | glibc             | yes             | Maximum familiarity / compat                            |
+| `ubuntu:*`          | ~77 MiB     | glibc             | yes             | Maximum familiarity / compat                            |
 
-Distroless numbers: `static` ≈ 2 MiB, roughly **half** of alpine and **under 2%** of full debian (~124 MiB).
+Distroless numbers: `static` ≈ 2 MiB, **well under half** of alpine and **under 2%** of full debian (~124 MiB).
 
 ### The musl-vs-glibc reality (the alpine trap)
 
@@ -347,7 +347,7 @@ Source: [Docker best-practices](https://docs.docker.com/build/building/best-prac
 
 ### 4.2 Pick the right final base
 
-See the §1 table. For a static binary, `scratch` or `distroless/static` (~2 MiB) beats alpine (~5–7 MiB) and crushes debian-slim (~74 MB). Distroless also ships no shell → smaller attack surface and cleaner scans, at the cost of no `exec` debugging (use the `:debug` variants, which add busybox, when you must shell in).
+See the §1 table. For a static binary, `scratch` or `distroless/static` (~2 MiB) beats alpine (~5–7 MiB) and crushes debian-slim (~74 MiB). Distroless also ships no shell → smaller attack surface and cleaner scans, at the cost of no `exec` debugging (use the `:debug` variants, which add busybox, when you must shell in).
 
 ### 4.3 Clean apt cache in the same layer; `--no-install-recommends`
 
