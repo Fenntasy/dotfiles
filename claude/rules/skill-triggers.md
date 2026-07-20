@@ -11,6 +11,7 @@ When editing files that match a pattern below, load the corresponding skill befo
 | `*.md`                                                 | `/markdown`         | Consistent formatting across all Markdown files |
 | `docs/**`                                              | `/documentation`    | Doc structure, navigation, drift prevention     |
 | `**/CLAUDE.md`, `.claude/**`, `claude/**`, `memory/**` | `/claude-authoring` | Config structure and authoring conventions      |
+| `**/Dockerfile*`, `*.dockerfile`, `.dockerignore`      | `/dockerfile`       | Image security, build speed, and size decisions |
 
 ## Task-triggered skills
 
@@ -36,6 +37,7 @@ When the user's request matches an intent below, invoke the skill before startin
 | `/roborev`          | Code review workflow, fixing findings, pre-push | "roborev", "review findings", "fix findings", "review before push"                   |
 | `/ship`             | Deliver finished work: commit → review → push → MR/PR | "ship", "commit and review", "push and MR", "the usual routine", "let's commit" |
 | `/nvim-config`      | Questions about the user's Neovim config        | "shortcut for", "how did I", "which LSP", "vim config", "neovim", "keymap for"       |
+| `/dockerfile`       | Writing/reviewing Dockerfiles, image hardening  | "Dockerfile", "base image", "alpine vs slim", "shrink the image", "multi-stage", "containerize", "docker build is slow", "distroless" |
 
 ## Composite workflows
 
