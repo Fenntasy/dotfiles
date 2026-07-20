@@ -100,9 +100,9 @@ Sources: [distroless](https://github.com/GoogleContainerTools/distroless) · [Do
 Never ship the default root. A container breakout as root maps toward root on the host — OWASP calls non-root "the best way to prevent privilege escalation attacks." Create a dedicated unprivileged user and switch with `USER`, using a **numeric UID** so orchestrators can verify non-root without resolving `/etc/passwd`.
 
 ```dockerfile
-# Debian/Ubuntu
-RUN groupadd -r app && useradd --no-log-init -r -g app app
-USER app
+# Debian/Ubuntu — assign a fixed numeric UID so `USER` can reference it numerically
+RUN groupadd -r app && useradd --no-log-init -r -u 10001 -g app app
+USER 10001:10001
 ```
 
 **Distroless:** the `:nonroot` variants ship a pre-created user at **UID 65532** — skip `useradd`. Use the numeric form; Kubernetes `runAsNonRoot: true` verifies numeric UIDs only, not names.
@@ -216,14 +216,14 @@ Sources: [Docker best-practices](https://docs.docker.com/build/building/best-pra
 
 ### 2.8 File-permission hygiene
 
-Sources disagree; the stronger security argument (Sysdig) is to **not** blanket-`chown` to the app user. The app needs **execute**, not **ownership**. Keep binaries **root-owned and non-writable by the app user** so a compromised process can't rewrite its own binaries (persistence defense). Only `chown` the specific directories the app must write to:
+Sources disagree; the stronger security argument (Sysdig) is to **not** blanket-`chown` to the app user. The app needs **execute**, not **ownership**. Keep binaries **root-owned and non-writable by the app user** so a compromised process can't rewrite its own binaries (persistence defense). Only `chown` the specific directories the app must write to. A fixed numeric UID (here `10001`) is the right default: it satisfies k8s `runAsNonRoot` (§2.1) and gives writable dirs a stable owner. It is **not** universal, though — arbitrary-UID platforms (OpenShift's restricted SCC) run the container as a *random* UID in group `0`, so ownership by `10001` buys nothing there. To stay portable across both, don't rely on the UID owning its dirs: make writable dirs **group-owned by GID 0 and group-writable**, and keep ephemeral state in `/tmp`.
 
 ```dockerfile
-RUN mkdir /data && chown app /data
-USER app
+RUN mkdir /data && chown 10001:0 /data && chmod g+rwX /data
+USER 10001:10001
 ```
 
-Also: don't hard-require a specific UID — write runtime state to `/tmp` so the image tolerates an arbitrary UID (OpenShift assigns random ones). Reach for `COPY --chown` only on genuinely writable dirs, not on executables.
+Reach for `COPY --chown` only on genuinely writable dirs, not on executables.
 
 Sources: [Sysdig](https://www.sysdig.com/learn-cloud-native/dockerfile-best-practices) · [Snyk](https://snyk.io/blog/10-docker-image-security-best-practices/)
 
