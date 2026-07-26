@@ -159,7 +159,7 @@ Tags are **mutable** — `python:3.12-slim` can silently point at a new build to
 FROM python:3.12-slim@sha256:<digest>
 ```
 
-**Tradeoff — pin *and* automate:** a frozen digest also freezes out security patches. Pair digest pinning with Renovate/Dependabot so bumps happen deliberately, not never. hadolint flags unpinned bases via **DL3006/DL3007**.
+**Tradeoff — pin *and* automate:** a frozen digest also freezes out security patches. Pair digest pinning with Renovate/Dependabot so bumps happen deliberately, not never. hadolint flags untagged / `:latest` bases via **DL3006/DL3007**, but a `@sha256:` digest itself is **not** linter-enforced — the automation is what keeps it current.
 
 Sources: [Snyk](https://snyk.io/blog/10-docker-image-security-best-practices/) · [Sysdig](https://www.sysdig.com/learn-cloud-native/dockerfile-best-practices)
 
@@ -397,7 +397,7 @@ Sources: [Docker: multi-service container](https://docs.docker.com/engine/contai
 
 Gate CI and fail the build on findings.
 
-- **hadolint** — Dockerfile linter; enforces most rules in this skill by code (DL3006/DL3007 pinning, DL3008/DL3013/DL3016/DL3018 dependency pinning, DL3009 apt cleanup, DL3015 no-recommends, DL3020 ADD).
+- **hadolint** — Dockerfile linter; enforces most rules in this skill by code (DL3006/DL3007 base tagging, DL3008/DL3013/DL3016/DL3018 dependency pinning, DL3009 apt cleanup, DL3015 no-recommends, DL3020 ADD).
 - **Trivy** (Aqua) — most-adopted scanner; daemon-less, all-in-one (CVEs + misconfig + secrets + SBOM), SARIF output. Good default: `trivy image --exit-code 1 --severity HIGH,CRITICAL myimage:tag`.
 - **Grype** (Anchore) — fast pure-CVE scanner; pair with **Syft** for SBOMs.
 - **Docker Scout** — Docker-native, remediation + base-image upgrade suggestions.
