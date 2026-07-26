@@ -58,7 +58,7 @@ Distroless numbers: `static` ≈ 2 MiB, **well under half** of alpine and **unde
 
 Alpine uses **musl** libc; almost every prebuilt binary artifact in the ecosystem — Python wheels, native node modules, most language release binaries — is built against **glibc**. On Alpine those either fail to install or fall back to **compiling from source**, which needs a full toolchain (`build-base`) and is dramatically slower.
 
-Measured for a Python image with matplotlib + pandas: `python:3.8-slim` built in **~30s → 363 MB**; `python:3.8-alpine` built in **~1,557s → 851 MB** — **~52× slower and larger**. The "small base" was both slower *and* bigger once the native deps compiled.
+Measured for a Python image with matplotlib + pandas: `python:3.8-slim` built in **~30s → 363 MB**; `python:3.8-alpine` built in **~1,557s → 851 MB** — **~52× slower and ~2.3× larger**. The "small base" was both slower *and* bigger once the native deps compiled.
 
 ```dockerfile
 # WRONG — reflexive "smallest base" on a native-dep workload.
