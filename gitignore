@@ -3,3 +3,5 @@
 .elixir_ls
 secrets.env
 .fenn
+
+**/.claude/settings.local.json

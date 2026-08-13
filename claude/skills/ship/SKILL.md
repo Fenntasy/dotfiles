@@ -54,18 +54,9 @@ failing gate stops the ritual: report the failure, do not commit around it.
 ## 4. Review (roborev)
 
 1. `roborev review --branch --agent claude-code`.
-2. Wait with `roborev-wait` (in `~/.bin`) — run it via Bash in the
-   background rather than reinventing polling loops.
-3. Present every finding per `claude/rules/roborev-review-handling.md`:
-   reflect first, verify the reviewer's claims in the code, then let the
-   user decide each one (Fix / Dismiss / Discuss / Skip). Never change code
-   before the user decides; never batch-resolve.
-4. **Deliberate-choice guard:** before recommending a fix, check whether the
-   flagged code was a deliberate user choice (git blame / git log the line,
-   check memory). A finding that contradicts an intentional decision is
-   presented as a question, never as a recommended fix.
-5. Apply agreed fixes as **one `fix:` commit per review round**, then stop.
-   The user decides whether to re-review or move on.
+2. Load the `/roborev` skill and follow its interactive protocol: wait with
+   `roborev wait`, show the raw findings, let the user decide each one, one
+   `fix:` commit per round, then stop — the user decides whether to re-review.
 
 ## 5. Push
 
@@ -109,9 +100,6 @@ Never merge on your own initiative. When the user says merge:
 
 | Anti-pattern | Instead |
 | --- | --- |
-| Hand-rolled `while true; do roborev list…` polling | `roborev-wait` in background |
-| Fixing findings before the user decides | Present, recommend, wait |
 | Rewriting the MR body from memory | Fetch the template + full branch diff |
 | `--no-verify`, `git add -f`, merge without gates | Fix the cause or stop |
 | Shipping with a failing or skipped verification gate | Report and stop |
-| Auto-looping review → fix → re-review | One round, then user decides |
