@@ -6,7 +6,7 @@
 - If on `main` or `master` with uncommitted changes, create a branch before committing
 - Branch naming: `type/short-description` (lowercase, hyphens, no spaces)
 - Derive the branch name from the changes (e.g. `feat/add-libpq`, `fix/shell-startup`)
-- Never commit on top of a branch whose PR was merged or closed — PRs can be merged outside your control; check first (`gh pr view --json state`), recover per `/ship` preflight
+- Never commit on top of a branch whose PR was merged or closed — PRs can be merged outside your control; check first (`gh pr view --json state` / `glab mr view`), recover per `/ship` preflight
 
 ## Commit conventions
 
@@ -26,7 +26,9 @@
 
 ## Issue linking
 
-- When the repo tracks work in GitHub issues, reference at least one per PR — follow the repo's observed convention (check recent PRs) rather than forcing issues onto repos that don't use them
+Applies in repos that track work in GitHub issues — follow the repo's observed convention (check recent PRs) rather than forcing issues onto repos that don't use them.
+
+- Reference at least one issue per PR
 - Multi-concern PRs: each distinct fix or feature gets its own issue
 - Use `Fixes #N` (auto-closes on merge) or `Addresses #N` (no auto-close) in the PR body
 - If work addresses something not yet tracked, create the issue before or at PR time
@@ -39,7 +41,7 @@ For projects under `~/Workspace/norauto/`, structure the MR body with these sect
 ## Merge strategy
 
 - Always squash merge — never use merge or rebase strategies
-- Post-merge cleanup per `/ship`: back to main, pull, delete remote and local branch
+- Merge only on explicit ask — mechanics and post-merge cleanup (back to main, pull, delete remote and local branch) per `/ship`
 
 ## Merge gates
 
