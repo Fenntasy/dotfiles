@@ -66,8 +66,11 @@ failing gate stops the ritual: report the failure, do not commit around it.
    stop for the user's go-ahead before resolving.
 3. After any rebase, re-run the verification gates (step 2) — a clean rebase
    can still break the build.
-4. Push with `--force-with-lease` (add `-u` when no upstream). A lease
-   rejection means the remote moved unexpectedly: stop and report.
+4. Push with `--force-with-lease` (add `-u` when no upstream) — the lease
+   is the safety net, don't add redundant pulls before it. A lease
+   rejection means the remote moved unexpectedly: stop and report. If the
+   push fails because the remote branch was deleted, re-push with `-u` to
+   recreate it.
 
 ## 6. MR / PR
 

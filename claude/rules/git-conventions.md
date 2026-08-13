@@ -6,15 +6,11 @@
 - If on `main` or `master` with uncommitted changes, create a branch before committing
 - Branch naming: `type/short-description` (lowercase, hyphens, no spaces)
 - Derive the branch name from the changes (e.g. `feat/add-libpq`, `fix/shell-startup`)
-- Detect stale branches early — PRs can be merged outside your control (GitHub UI, standalone `gh`); check before committing on top
-- If on a feature branch, check if its PR was already merged/closed: `gh pr view --json state 2>/dev/null`
-  - If `state` is `MERGED` or `CLOSED`: warn the user about uncommitted changes, switch to main, pull, delete the stale branch (`git branch -D`), and create a fresh branch from main
+- Never commit on top of a branch whose PR was merged or closed — PRs can be merged outside your control; check first (`gh pr view --json state`), recover per `/ship` preflight
 
 ## Commit conventions
 
-- Never mention Claude, AI, or LLM anywhere in git output — commit messages, PR titles, PR bodies, branch names
-- Never include `Co-Authored-By` lines mentioning Claude or any AI
-- Never add "Generated with Claude Code" or similar footers to PRs
+- Never mention Claude, AI, or LLM anywhere in git output — commit messages, PR titles/bodies, branch names — including `Co-Authored-By` lines and "Generated with" footers
 - Use conventional commit format: `type(scope): description`
   - `feat`, `fix`, `refactor`, `test`, `docs`, `chore`, `ci`, `perf`
 - Keep the first line under 72 characters; wrap body lines at 80
@@ -23,22 +19,14 @@
 ## Pushing
 
 - Never push directly to `main` or `master`
-- **Every push requires a roborev review** — run `roborev review --branch --agent claude-code` before pushing. When the review completes, **show the raw `roborev show` output to the user**, then walk through findings with the user per `/roborev` (interactive). Never silently fix and re-review — the pre-push gate is not an authorization to auto-resolve. Fix or defer per user decision. This is not optional
+- **Every push requires a roborev review** — run `roborev review --branch --agent claude-code` before pushing; findings are handled per `/roborev` and `claude/rules/roborev-review-handling.md`. The gate is not an authorization to auto-resolve
 - **Roborev gate** — enforced by a PreToolUse hook on `git push` and `gh pr merge`. The hook blocks when: no reviews exist for the branch, reviews are still running/queued, or no `claude-code` review is `done`. If blocked, check status with `roborev list`
-- Fetch latest before pushing: `git fetch origin`
-- Rebase onto main if needed — check with `git merge-base --is-ancestor origin/main HEAD` (exit 0 = clean)
-  - If rebase hits conflicts: abort, inform the user of the conflicting files, and stop
-- Push with `--force-with-lease` — the safety net for remote divergence; don't add redundant pulls before it
-  - Add `-u` if no upstream is set
-  - If `--force-with-lease` rejects (remote has unknown commits): stop and inform the user
-  - If push fails because the remote branch was deleted: re-push with `-u` to recreate it
-- After every push, if no PR exists for the branch, create one with `gh pr create` (include issue refs, test plan, summary per `/project-management`)
-- After every push to a branch with an open PR, update the PR title and body to reflect ALL commits on the branch vs main — use `gh pr edit`. Keep the PR format (summary bullets, test plan checklist, issue references)
-- For merging, verify all merge gates (below), then `gh pr merge <number> --squash`
+- Push mechanics (fetch, rebase, `--force-with-lease`) live in `/ship` — stop and report on rebase conflicts, lease rejections, or failing checks; never auto-resolve or retry blindly
+- After every push, ensure a PR exists and its title/body reflect all commits on the branch vs main (mechanics and body format per `/ship` and `/project-management`)
 
 ## Issue linking
 
-- Each PR should reference at least one GitHub issue
+- When the repo tracks work in GitHub issues, reference at least one per PR — follow the repo's observed convention (check recent PRs) rather than forcing issues onto repos that don't use them
 - Multi-concern PRs: each distinct fix or feature gets its own issue
 - Use `Fixes #N` (auto-closes on merge) or `Addresses #N` (no auto-close) in the PR body
 - If work addresses something not yet tracked, create the issue before or at PR time
@@ -51,7 +39,7 @@ For projects under `~/Workspace/norauto/`, structure the MR body with these sect
 ## Merge strategy
 
 - Always squash merge — never use merge or rebase strategies
-- Post-merge cleanup: switch to main, pull, delete the remote branch (`git push origin --delete <branch>`), delete local branch (`git branch -D <branch>`)
+- Post-merge cleanup per `/ship`: back to main, pull, delete remote and local branch
 
 ## Merge gates
 
@@ -68,10 +56,7 @@ Before merging any PR — and when assessing whether a PR is mergeable — **all
 ## Dangerous flags
 
 - **Never use `git add -f` / `git add --force`** without explicit user approval — it bypasses `.gitignore` and silently commits generated files, secrets, or build artifacts. If `git add` rejects a file, the file is gitignored for a reason. Stop and ask
+- **Stage explicit paths you edited, never `git add -A` / `git add .`** — a repo-wide formatter or a test suite touches files you did not write. Never "clean up" a dirty tree to make a commit succeed
 - **Never use `--no-verify`** — pre-commit hooks are non-negotiable
 - **Never use `git reset --hard`** without explicit user approval — destroys uncommitted work
-
-## Principles
-
-- Prevent problems, don't recover from them — design workflows so errors can't happen rather than adding complex recovery logic
-- Stop and inform the user on failures — rebase conflicts, rejected pushes, failing checks. Never auto-resolve or retry blindly
+- **Never discard a working-tree change you did not make** — no `git checkout <path>`, `git restore`, `git stash`, or overwriting a dirty file (atomic stash-and-reapply like `git rebase --autostash` is fine; a bare `git stash` is not). Uncommitted is not disposable: an unstaged change is often the only copy of human work, and the user may be editing the repo while you work. If `git status` shows a modification you cannot trace to your own edit, stop and ask — even when it looks like test residue or generated output

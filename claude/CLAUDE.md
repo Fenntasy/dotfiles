@@ -29,6 +29,7 @@ What counts as approval:
 - A user message approves exactly one logical change. When it's done, report back — don't roll into the next change.
 - §4's "loop independently" applies *within* an approved approach. Choosing or changing the approach is always a checkpoint.
 - A rejected tool call means "stop and discuss" — never "retry with adjustments".
+- Flagging a tradeoff is stopping. If you catch yourself writing "I'll flag that…", "worth noting…", "one concern is…", or "I'll honor X but…" about a choice, you have found a decision point — stop and wait for the answer. Never flag-and-proceed: narrating a tradeoff while continuing to act defeats the purpose. The user's default answer is not "do what you were going to anyway."
 - If unsure whether something is a checkpoint, it is.
 
 How to ask: use `AskUserQuestion` for closed decisions with enumerable options (fix/dismiss a review finding, A-or-B tradeoffs); ask in prose for open-ended direction — "which approach", "what should this look like" — so the user can answer freely.
