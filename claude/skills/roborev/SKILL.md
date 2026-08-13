@@ -22,11 +22,11 @@ Roborev reviews commits via post-commit hooks and an on-machine daemon. This ski
 
 Default for any review, however triggered. Auto mode is opt-in only.
 
-1. Run `roborev show` and paste the raw output to the user verbatim — before any summary, analysis, or fix
+1. Run `roborev show` and put the full review into your message text — before any summary, analysis, or fix. Tool results, Read output, and background task files are not visible to the user: content only counts as shown when it is in the message itself. Format it for readability (severity bold, paths as code, findings as sections) but keep every reviewer sentence intact — reformatting is welcome, trimming or paraphrasing is not
 2. No findings → report clean and stop
 3. For each finding (blocker → medium → low):
    - Reflect first: read the relevant code, check project rules, verify the reviewer's claim, and check whether the flagged code was a deliberate choice (git blame, memory) — intentional code gets a question, not a recommended fix
-   - Present severity, file, location, the reviewer's description, and your recommendation with rationale — never a bare option list
+   - Present the finding's complete reviewer text (formatted, never paraphrased), then your recommendation with rationale below it — never a bare option list. The message carrying the `AskUserQuestion` must itself contain the finding's full text: the user decides on what the reviewer wrote, not on your compression of it
    - Ask via `AskUserQuestion`: **Fix** / **Dismiss** / **Discuss** / **Skip**, recommended option marked
    - Fix → implement. Dismiss → record the user's reason, no code change. Discuss → investigate deeper, report back, re-ask. Skip → defer until after the remaining findings
 4. After all findings: batch fixes into one `fix:` commit, wait for the re-review with `roborev wait`
