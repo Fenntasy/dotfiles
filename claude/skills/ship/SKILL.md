@@ -78,8 +78,8 @@ failing gate stops the ritual: report the failure, do not commit around it.
    is the safety net, don't add redundant pulls before it. A lease
    rejection means the remote moved unexpectedly: stop and report. If the
    push fails because the remote branch was deleted, re-check the PR/MR
-   state (`gh pr view --json state,headRefOid` / `glab mr view --output
-   json`). If a merged/closed PR explains the deletion, apply the
+   state (`gh pr view --json state,headRefOid` /
+   `glab mr view --output json`). If a merged/closed PR explains the deletion, apply the
    Preflight branch-state logic: tip equals the merged head SHA → all
    work landed, clean up per Preflight; otherwise stop and report both
    SHAs — never delete the branch, the user picks the recovery
