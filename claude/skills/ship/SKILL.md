@@ -69,8 +69,11 @@ failing gate stops the ritual: report the failure, do not commit around it.
 4. Push with `--force-with-lease` (add `-u` when no upstream) — the lease
    is the safety net, don't add redundant pulls before it. A lease
    rejection means the remote moved unexpectedly: stop and report. If the
-   push fails because the remote branch was deleted, re-push with `-u` to
-   recreate it.
+   push fails because the remote branch was deleted, re-check the PR/MR
+   state first (`gh pr view --json state` / `glab mr view --output json`) —
+   a deletion usually means the PR was squash-merged behind you, which is
+   the Preflight stale-branch case, not a retry case. Re-push with `-u`
+   only when no merged/closed PR explains the deletion.
 
 ## 6. MR / PR
 
