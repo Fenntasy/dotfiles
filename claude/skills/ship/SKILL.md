@@ -26,8 +26,11 @@ Where this skill and those rules disagree, the rules win.
 1. **Branch state.** Never ship from `main`/`master` — create a
    `type/short-description` branch first. If already on a feature branch,
    check its MR/PR wasn't merged behind your back (`gh pr view --json state`
-   / `glab mr view --output json`): if merged or closed, warn, switch to main, pull, delete
-   the stale branch, branch fresh.
+   / `glab mr view --output json`). If merged and the branch holds no
+   commits absent from updated main: switch to main, pull, delete the
+   stale branch, branch fresh. If the PR was closed without merging, or
+   the branch holds commits that never landed on main: stop and report —
+   never delete; the user picks the recovery.
 2. **Working tree survey.** `git status` + `git diff` — know what will be
    staged. Untracked scratch files (plans, notes) stay out unless the user
    says otherwise. Never `git add -f`.
