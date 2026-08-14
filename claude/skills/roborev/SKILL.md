@@ -26,8 +26,7 @@ Default for any review, however triggered. Auto mode is opt-in only.
 2. No findings → report clean and stop
 3. For each finding (blocker → medium → low):
    - Reflect first: read the relevant code, check project rules, verify the reviewer's claim, and check whether the flagged code was a deliberate choice (git blame, memory) — intentional code gets a question, not a recommended fix
-   - Present the finding's complete reviewer text (formatted, never paraphrased), then your recommendation with rationale below it — never a bare option list. The message carrying the `AskUserQuestion` must itself contain the finding's full text: the user decides on what the reviewer wrote, not on your compression of it
-   - Ask via `AskUserQuestion`: **Fix** / **Dismiss** / **Discuss** / **Skip**, recommended option marked
+   - Ask via `AskUserQuestion` with the finding's complete reviewer text inside the question field itself — severity, location, problem, suggested fix, verbatim — followed by your recommendation with rationale. Never a bare option list, never a paraphrase: message text written before a tool call in the same turn may not render, so the dialog must be self-contained; the user decides on what the reviewer wrote, not on your compression of it. Options: **Fix** / **Dismiss** / **Discuss** / **Skip**, recommended option marked
    - Fix → implement the change *and complete it*: sweep adjacent text/code for the same flaw and check that the fix's conditions are actually verifiable before moving on — a fix that feeds the next round is not a fix. Dismiss → record the user's reason, no code change. Discuss → investigate deeper, report back, re-ask. Skip → defer until after the remaining findings
 4. After all findings: batch fixes into one `fix:` commit, wait for the re-review with `roborev wait`
 5. Repeat until clean or the user says stop

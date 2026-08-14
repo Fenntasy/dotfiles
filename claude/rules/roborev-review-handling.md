@@ -23,9 +23,11 @@ branching, see `claude/rules/git-conventions.md`.
   (no cron/wakeup that auto-fixes or auto-pushes after a review).
 - **Don't bury findings.** Surface them as findings for decision — not folded
   into a summary with your verdicts already applied. The reviewer's complete
-  text must appear in your message text — tool results and read files are not
-  visible to the user, and a paraphrase at decision time is a buried finding.
-  Formatting for readability is fine; trimming or rewording is not.
+  text must travel inside the decision prompt itself (the `AskUserQuestion`
+  question text) — tool results and read files are not visible to the user,
+  and message text written before a tool call in the same turn may not
+  render. A paraphrase at decision time is a buried finding. Formatting for
+  readability is fine; trimming or rewording is not.
 
 ## Why
 
