@@ -26,7 +26,7 @@ Where this skill and those rules disagree, the rules win.
 1. **Branch state.** Never ship from `main`/`master` — create a
    `type/short-description` branch first. If already on a feature branch,
    check its MR/PR wasn't merged behind your back (`gh pr view --json state`
-   / `glab mr view`): if merged or closed, warn, switch to main, pull, delete
+   / `glab mr view --output json`): if merged or closed, warn, switch to main, pull, delete
    the stale branch, branch fresh.
 2. **Working tree survey.** `git status` + `git diff` — know what will be
    staged. Untracked scratch files (plans, notes) stay out unless the user
@@ -70,10 +70,12 @@ failing gate stops the ritual: report the failure, do not commit around it.
    is the safety net, don't add redundant pulls before it. A lease
    rejection means the remote moved unexpectedly: stop and report. If the
    push fails because the remote branch was deleted, re-check the PR/MR
-   state first (`gh pr view --json state` / `glab mr view --output json`) —
-   a deletion usually means the PR was squash-merged behind you, which is
-   the Preflight stale-branch case, not a retry case. Re-push with `-u`
-   only when no merged/closed PR explains the deletion.
+   state (`gh pr view --json state` / `glab mr view --output json`). If a
+   merged/closed PR explains the deletion, the local branch holds commits
+   that never landed anywhere — stop and report; never delete the branch,
+   let the user pick the recovery (typically: fresh branch from updated
+   main, move the commits over). Re-push with `-u` only when no
+   merged/closed PR explains the deletion.
 
 ## 6. MR / PR
 
