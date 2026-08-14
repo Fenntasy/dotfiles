@@ -22,7 +22,7 @@ Roborev reviews commits via post-commit hooks and an on-machine daemon. This ski
 
 Default for any review, however triggered. Auto mode is opt-in only.
 
-1. Run `roborev show` and put the full review into your message text — before any summary, analysis, or fix. Tool results, Read output, and background task files are not visible to the user: content only counts as shown when it is in the message itself. Format it for readability (severity bold, paths as code, findings as sections) but keep every reviewer sentence intact — reformatting is welcome, trimming or paraphrasing is not
+1. Run `roborev show` and put a formatted overview into your message text — finding count, severity and location per finding, and the reviewer's summary verbatim. Tool results, Read output, and background task files are not visible to the user: content only counts as shown when it is in the message itself. Each finding's complete text follows at its decision point (step 3) — the overview orients, the decision message carries the evidence
 2. No findings → report clean and stop
 3. For each finding (blocker → medium → low):
    - Reflect first: read the relevant code, check project rules, verify the reviewer's claim, and check whether the flagged code was a deliberate choice (git blame, memory) — intentional code gets a question, not a recommended fix
@@ -37,7 +37,7 @@ High/blocker findings default to Fix — recommend Dismiss only when the claim i
 
 ## Auto mode (`/roborev auto` only)
 
-1. Run `roborev show` — the raw output still goes to the user first
+1. Run `roborev show` and put the full review into your message text before fixing anything — formatted, never trimmed; auto mode has no per-finding decision messages, so the upfront display carries everything
 2. Verify each claim before fixing — the reviewer can be wrong
 3. Fix verified findings, one `fix:` commit, wait for the re-review with `roborev wait`, repeat until clean
 4. Report wrong claims as dismissed, with rationale

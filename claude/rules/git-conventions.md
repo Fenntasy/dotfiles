@@ -6,7 +6,7 @@
 - If on `main` or `master` with uncommitted changes, create a branch before committing
 - Branch naming: `type/short-description` (lowercase, hyphens, no spaces)
 - Derive the branch name from the changes (e.g. `feat/add-libpq`, `fix/shell-startup`)
-- Never commit on top of a branch whose PR was merged or closed — PRs can be merged outside your control; check first (`gh pr view --json state` / `glab mr view`), recover per `/ship` preflight
+- Never commit on top of a branch whose PR was merged or closed — PRs can be merged outside your control; check first (`gh pr view --json state` / `glab mr view --output json`; no PR/MR yet is a normal outcome for a fresh branch), recover per `/ship` preflight
 
 ## Commit conventions
 
