@@ -25,9 +25,15 @@ Where this skill and those rules disagree, the rules win.
 
 1. **Branch state.** Never ship from `main`/`master` — create a
    `type/short-description` branch first. If already on a feature branch,
-   check its MR/PR wasn't merged behind your back (`gh pr view --json state`
-   / `glab mr view`): if merged or closed, warn, switch to main, pull, delete
-   the stale branch, branch fresh.
+   check its MR/PR state (`gh pr view --json state,headRefOid` /
+   `glab mr view --output json`, field `diff_refs.head_sha`).
+   Merged and the local branch tip equals the merged head SHA → all
+   local work landed: switch to main, pull, delete the stale branch
+   (`git branch -D` — safe because the SHA check just proved the work
+   landed; after a squash merge `-d` refuses), branch fresh. Closed
+   without merging, or tips differ → local state may not match what
+   merged: stop and report both SHAs — never delete; the user picks
+   the recovery.
 2. **Working tree survey.** `git status` + `git diff` — know what will be
    staged. Untracked scratch files (plans, notes) stay out unless the user
    says otherwise. Never `git add -f`.
@@ -61,13 +67,25 @@ failing gate stops the ritual: report the failure, do not commit around it.
 ## 5. Push
 
 1. `git fetch origin`, then `git merge-base --is-ancestor origin/main HEAD`.
-2. Not an ancestor → rebase onto `origin/main`. Conflicts → abort the
-   rebase, list the conflicting files and what each conflict is about, and
-   stop for the user's go-ahead before resolving.
+2. Not an ancestor → rebase onto `origin/main`. A dirty working tree
+   blocks rebase — use `git rebase --autostash` (atomic stash-and-reapply,
+   sanctioned by the working-tree rule; a bare `git stash` is not).
+   Conflicts → abort the rebase, list the conflicting files and what each
+   conflict is about, and stop for the user's go-ahead before resolving.
 3. After any rebase, re-run the verification gates (step 2) — a clean rebase
    can still break the build.
-4. Push with `--force-with-lease` (add `-u` when no upstream). A lease
-   rejection means the remote moved unexpectedly: stop and report.
+4. Push with `--force-with-lease` (add `-u` when no upstream) — the lease
+   is the safety net, don't add redundant pulls before it. A lease
+   rejection means the remote moved unexpectedly: stop and report. If the
+   push fails because the remote branch was deleted, re-check the PR/MR
+   state (`gh pr view --json state,headRefOid` /
+   `glab mr view --output json`). If a merged/closed PR explains the deletion, apply the
+   Preflight branch-state logic: tip equals the merged head SHA → all
+   work landed, clean up per Preflight; otherwise stop and report both
+   SHAs — never delete the branch, the user picks the recovery
+   (typically: fresh branch from updated main, cherry-pick the local
+   commits). Re-push with `-u` only when no merged/closed PR explains
+   the deletion.
 
 ## 6. MR / PR
 
@@ -94,7 +112,9 @@ Never merge on your own initiative. When the user says merge:
 
 1. Check every merge gate from `claude/rules/git-conventions.md`: reviews
    done, threads resolved, CI green, test plan complete, PR body current.
-2. Squash merge. Then: switch to main, pull, delete remote and local branch.
+2. Squash merge. Then: switch to main, pull, delete the remote branch and
+   the local one (`git branch -D` — after a squash merge `-d` refuses even
+   though the work landed).
 
 ## 8. Anti-patterns
 
