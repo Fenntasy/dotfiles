@@ -27,6 +27,7 @@ When the user's request matches an intent below, invoke the skill before startin
 | `/typescript`       | Type safety, testing, build tooling            | "write a test", "fix type error", "bundle size"                                      |
 | `/css-responsive`   | Responsive layout, Tailwind, touch             | "mobile layout", "responsive", "touch targets"                                       |
 | `/ux-design`        | Design system, accessibility, form UX          | "design tokens", "a11y audit", "form validation UX"                                  |
+| `/information-design` | Presenting one record's fields on a readable surface | "design this card", "present these fields", "too many labels", "make this detail view readable" |
 | `/api-design`       | API contracts and HTTP semantics               | "design the endpoint", "status code", "pagination"                                   |
 | `/domain-design`    | Domain modeling and schema changes             | "aggregate boundaries", "schema evolution"                                           |
 | `/web-security`     | Security review or hardening                   | "security review", "add auth", "CORS", "harden"                                      |
