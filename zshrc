@@ -54,3 +54,8 @@ eval "$(mise activate zsh)"
 
 # Source secrets (CDPATH, tokens, etc.)
 [[ -f ${HOME}/.zshrc.secrets ]] && source ${HOME}/.zshrc.secrets
+
+fpath+=~/.zfunc; autoload -Uz compinit; compinit
+
+zstyle ':completion:*' menu select
+
