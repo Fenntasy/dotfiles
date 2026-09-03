@@ -7,8 +7,8 @@ description: >
   rebase/push safety, template-aware MR/PR bodies, post-merge cleanup.
   Use when: the work is done and the user says "ship", "commit and review",
   "push and MR", or "the usual routine".
-version: 1.0.0
-date: 2026-07-06
+version: 1.1.0
+date: 2026-09-03
 user-invocable: true
 argument-hint: "optional: 'no-mr' to stop after push, 'merge' to include merge + cleanup"
 ---
@@ -91,19 +91,23 @@ failing gate stops the ritual: report the failure, do not commit around it.
 
 1. If none exists, create one; if one exists, update title and body to
    reflect **all** commits on the branch vs main.
-2. **Template first.** GitLab: fetch the repo's default description template
+2. **Assign the user.** Pass `--assignee @me` when creating
+   (`glab mr create` / `gh pr create`). If the MR/PR already exists
+   without the user as assignee, add them (`glab mr update --assignee @me` /
+   `gh pr edit --add-assignee @me`).
+3. **Template first.** GitLab: fetch the repo's default description template
    through the API —
    `glab api "projects/:id/templates/merge_requests/default" | jq -r .content`
    — and follow its structure. GitHub: read
    `.github/pull_request_template.md`. Don't reconstruct a template from
    memory.
-3. Body is plain markdown, directly copyable: concise motivation, what
+4. Body is plain markdown, directly copyable: concise motivation, what
    changed, how it was tested. Only claim verification that actually
    happened; list still-pending manual checks explicitly.
-4. No checkbox items that can only be checked after merge.
-5. Reference tickets/issues per the project's tracker conventions (some
+5. No checkbox items that can only be checked after merge.
+6. Reference tickets/issues per the project's tracker conventions (some
    projects track in Jira and don't link repo issues — when unsure, ask).
-6. Pass long bodies via heredoc directly to `glab`/`gh` — no temp-file
+7. Pass long bodies via heredoc directly to `glab`/`gh` — no temp-file
    round-trips.
 
 ## 7. Merge + cleanup (only on explicit ask)
