@@ -91,10 +91,13 @@ failing gate stops the ritual: report the failure, do not commit around it.
 
 1. If none exists, create one; if one exists, update title and body to
    reflect **all** commits on the branch vs main.
-2. **Assign the user.** Pass `--assignee @me` when creating
-   (`glab mr create` / `gh pr create`). If the MR/PR already exists
-   without the user as assignee, add them (`glab mr update --assignee @me` /
-   `gh pr edit --add-assignee @me`).
+2. **Assign the user.** GitHub: `--assignee @me` on `gh pr create`; on an
+   existing PR, `gh pr edit --add-assignee @me` (additive). GitLab: `@me`
+   is not documented — resolve the username first
+   (`glab api user | jq -r .username`), pass `--assignee <username>` on
+   `glab mr create`; on an existing MR, add with
+   `glab mr update --assignee "+<username>"` — `update --assignee`
+   *replaces* the assignee list unless the username is prefixed with `+`.
 3. **Template first.** GitLab: fetch the repo's default description template
    through the API —
    `glab api "projects/:id/templates/merge_requests/default" | jq -r .content`

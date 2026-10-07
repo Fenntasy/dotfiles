@@ -53,7 +53,7 @@ format = '[$symbol \($output\)]($style) '
 
 [custom.kube]
 command = 'kube-prompt'
-when = '! grep -q "^current-context: aks_prod_" "${KUBECONFIG:-$HOME/.kube/config}"'
+when = '[ -f "${KUBECONFIG:-$HOME/.kube/config}" ] && ! grep -q "^current-context: aks_prod_" "${KUBECONFIG:-$HOME/.kube/config}"'
 symbol = "\U000F10FE" # Nerd Font: nf-md-kubernetes
 style = 'bold cyan'
 format = '[$symbol \($output\)]($style) '
