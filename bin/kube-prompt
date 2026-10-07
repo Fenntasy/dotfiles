@@ -1,0 +1,16 @@
+#!/bin/sh
+# Prints the current Kubernetes context for the Starship prompt, shortened:
+#   aks_prod_app_westeurope_05 + aks-prod-app-westeurope-05--architecture
+#   -> "prod · architecture"
+# Contexts outside the aks_<env>_* pattern print as-is.
+
+kubectl config view --minify \
+  -o jsonpath='{.contexts[0].name}{"\t"}{.contexts[0].context.namespace}' 2>/dev/null |
+  awk -F'\t' '{
+    ctx = $1
+    if (ctx ~ /^aks_[a-z]+_/) { split(ctx, part, "_"); ctx = part[2] }
+    ns = $2
+    sub(/.*--/, "", ns)
+    if (ns != "") printf "%s · %s", ctx, ns
+    else printf "%s", ctx
+  }'
