@@ -34,9 +34,26 @@ detect_files = ["package-lock.json", "yarn.lock"]
 detect_folders = ["node_modules"]
 detect_extensions = []
 
+# Replaced by custom.kube below: the built-in module can't shorten
+# namespaces like aks-prod-app-westeurope-05--architecture
 [kubernetes]
-disabled = false
-format = '[☸]($style) [$context]($style) \($namespace\) '
-contexts = [
-    { context_pattern = "aks_prod.*", style = "red", context_alias = "prod" }
-]
+disabled = true
+
+[gcloud]
+symbol = "" # Nerd Font: nf-fa-google
+format = '[$symbol \($account\)]($style) '
+
+# Two modules so prod renders red; `when` greps the kubeconfig to stay cheap
+[custom.kube_prod]
+command = 'kube-prompt'
+when = 'grep -q "^current-context: aks_prod_" "${KUBECONFIG:-$HOME/.kube/config}"'
+symbol = "\U000F10FE" # Nerd Font: nf-md-kubernetes
+style = 'red'
+format = '[$symbol \($output\)]($style) '
+
+[custom.kube]
+command = 'kube-prompt'
+when = '! grep -q "^current-context: aks_prod_" "${KUBECONFIG:-$HOME/.kube/config}"'
+symbol = "\U000F10FE" # Nerd Font: nf-md-kubernetes
+style = 'bold cyan'
+format = '[$symbol \($output\)]($style) '
