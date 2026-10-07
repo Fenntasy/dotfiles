@@ -3,6 +3,8 @@ fpath=(
   # /usr/local/share/zsh/site-functions
   /usr/local/share/zsh-completions
   ~/.zsh/completion
+  # Snowflake CLI completions (_snow), written by `snow --install-completion`;
+  # rerunning it re-appends a duplicate compinit block to ~/.zshrc
   ~/.zfunc
   $fpath
 )

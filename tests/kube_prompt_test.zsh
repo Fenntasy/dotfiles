@@ -64,6 +64,33 @@ out=$(PATH="/usr/bin:/bin" "$repo_root/bin/kube-prompt" 2>&1)
   && pass "missing kubectl prints nothing" \
   || fail "missing kubectl printed: $out"
 
+# --- Starship `when` conditions -----------------------------------------------
+# Read both conditions from the real config, so the test follows any edit.
+when_of() {
+  sed -n "/^\[custom\.$1\]/,/^$/s/^when = '\(.*\)'$/\1/p" \
+    "$repo_root/config/starship.toml"
+}
+local when_prod=$(when_of kube_prod) when_kube=$(when_of kube)
+[[ -n "$when_prod" && -n "$when_kube" ]] \
+  && pass "found both when conditions in starship.toml" \
+  || fail "could not read when conditions from starship.toml"
+
+print 'current-context: aks_prod_app_westeurope_05' > "$work_dir/prod.yaml"
+print 'current-context: aks_preprod_app_westeurope_05' > "$work_dir/preprod.yaml"
+
+# expect_modules <description> <kubeconfig> <expected visible modules>
+expect_modules() {
+  local shown=()
+  # Starship discards stderr from `when`, e.g. grep's missing-file error.
+  KUBECONFIG="$2" zsh -f -c "$when_prod" 2>/dev/null && shown+=(kube_prod)
+  KUBECONFIG="$2" zsh -f -c "$when_kube" 2>/dev/null && shown+=(kube)
+  [[ "${shown[*]}" == "$3" ]] && pass "$1" || fail "$1: got '${shown[*]}', want '$3'"
+}
+
+expect_modules "prod context shows only the red module" "$work_dir/prod.yaml" kube_prod
+expect_modules "non-prod context shows only the cyan module" "$work_dir/preprod.yaml" kube
+expect_modules "missing kubeconfig shows neither module" "$work_dir/none.yaml" ''
+
 # --- Result -------------------------------------------------------------------
 if (( failures > 0 )); then
   print "\n$failures assertion(s) failed"
