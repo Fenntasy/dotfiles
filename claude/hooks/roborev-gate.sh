@@ -13,8 +13,19 @@ set -euo pipefail
 command -v jq >/dev/null 2>&1 || exit 0
 command -v roborev >/dev/null 2>&1 || exit 0
 
-# Extract the command from Bash tool input (|| true: invalid/missing JSON → empty command → exit 0)
-COMMAND=$(echo "${TOOL_INPUT:-}" | jq -r '.command // empty' 2>/dev/null) || true
+# The hook payload arrives as JSON on stdin — there is no TOOL_INPUT env var.
+INPUT=$(cat)
+
+# Only gate the Bash tool
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name // empty' 2>/dev/null) || true
+[ "$TOOL_NAME" = "Bash" ] || exit 0
+
+# Run the git/roborev queries in the session's working directory
+HOOK_CWD=$(echo "$INPUT" | jq -r '.cwd // empty' 2>/dev/null) || true
+if [ -n "$HOOK_CWD" ]; then cd "$HOOK_CWD" || exit 0; fi
+
+# Extract the command (|| true: invalid/missing JSON → empty command → exit 0)
+COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null) || true
 [ -z "$COMMAND" ] && exit 0
 
 # Only gate push and merge commands
