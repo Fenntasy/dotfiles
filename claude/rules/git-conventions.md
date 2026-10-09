@@ -20,7 +20,7 @@
 
 - Never push directly to `main` or `master`
 - **Every push requires a roborev review** — run `roborev review --branch --agent claude-code` before pushing; findings are handled per `/roborev` and `claude/rules/roborev-review-handling.md`. The gate is not an authorization to auto-resolve
-- **Roborev gate** — enforced by a PreToolUse hook on `git push` and `gh pr merge`. The hook blocks when: no reviews exist for the branch, reviews are still running/queued, or no `claude-code` review is `done`. If blocked, check status with `roborev list`
+- **Roborev gate** — before `git push` or `gh pr merge`, check `roborev list`. Do not proceed when: no reviews exist for the branch, reviews are still running/queued, or no `claude-code` review is `done`
 - Push mechanics (fetch, rebase, `--force-with-lease`) live in `/ship` — stop and report on rebase conflicts, lease rejections, or failing checks; never auto-resolve or retry blindly
 - After every push, ensure a PR exists and its title/body reflect all commits on the branch vs main (mechanics and body format per `/ship` and `/project-management`)
 
@@ -48,7 +48,7 @@ For projects under `~/Workspace/norauto/`, structure the MR body with these sect
 Before merging any PR — and when assessing whether a PR is mergeable — **all** of these must be true:
 
 - Zero unresolved review threads
-- **Roborev reviews complete** — run `roborev list` and verify at least one `claude-code` review is `done` and no reviews are `running` or `queued`. If reviews are missing, trigger them. The PreToolUse hook enforces this at push/merge time, but also check proactively when reporting merge readiness
+- **Roborev reviews complete** — run `roborev list` and verify at least one `claude-code` review is `done` and no reviews are `running` or `queued`. If reviews are missing, trigger them. Check this proactively when reporting merge readiness
 - **Test plan complete** — read the PR body and verify every test plan item is checked (`[x]`). If any item is unchecked, run the verification yourself or ask the user. Never merge with unchecked items
 - CI passes — use `gh pr checks <number> --repo {owner}/{repo} --watch` to confirm
 - PR is still in `OPEN` state

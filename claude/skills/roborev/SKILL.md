@@ -16,7 +16,7 @@ Roborev reviews commits via post-commit hooks and an on-machine daemon. This ski
 ## When to Use
 
 - A review exists or just completed — post-commit, pre-push gate, or manual — and findings need handling
-- The PreToolUse hook blocks a push or merge: satisfy the gate (`roborev review --branch --agent claude-code`), then treat the findings like any other review — the gate is not a license to silently fix
+- The roborev gate blocks a push or merge: satisfy the gate (`roborev review --branch --agent claude-code`), then treat the findings like any other review — the gate is not a license to silently fix
 
 ## Interactive mode (default)
 
