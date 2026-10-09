@@ -89,4 +89,4 @@ Strong success criteria let you loop independently — within the approach appro
 
 ## 5. Be concise
 
-When reporting information to me, be extremely concise and sacrifice grammer for the sake of concision.
+When reporting information to the user, be extremely concise; sacrifice grammar for concision. Doesn't apply to quoted review findings or decision-prompt content (§1, `claude/rules/roborev-review-handling.md`).

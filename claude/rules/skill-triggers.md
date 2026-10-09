@@ -42,9 +42,9 @@ When the user's request matches an intent below, invoke the skill before startin
 | `/ship`             | Deliver finished work: commit → review → push → MR/PR | "ship", "commit and review", "push and MR", "the usual routine", "let's commit" |
 | `/nvim-config`      | Questions about the user's Neovim config        | "shortcut for", "how did I", "which LSP", "vim config", "neovim", "keymap for"       |
 | `/dockerfile`       | Writing/reviewing Dockerfiles, image hardening  | "Dockerfile", "base image", "alpine vs slim", "shrink the image", "multi-stage", "containerize", "docker build is slow", "distroless" |
-| `/rust`             | Writing/reviewing Rust, crate API design        | "Rust", "crate", "cargo", "unsafe", "panic or Result", "builder", "clippy", "workspace layout", "error type" |
-| `/tauri`            | Tauri desktop apps, Rust core + webview         | "Tauri", "invoke", "command", "IPC", "webview", "isolation pattern", "src-tauri", "binary size" |
-| `/elm`              | Writing/reviewing Elm, Model/Msg design         | "Elm", "Msg", "update function", "ports", "decoder", "opaque type", "split this module", "elm-review" |
+| `/rust`             | Writing/reviewing Rust, crate API design        | "Rust", "crate", "cargo", "unsafe", "panic or Result", "Rust builder", "clippy", "cargo workspace", "Rust error type" |
+| `/tauri`            | Tauri desktop apps, Rust core + webview         | "Tauri", "invoke() from the frontend", "Tauri command", "IPC", "webview", "isolation pattern", "src-tauri", "Tauri binary size" |
+| `/elm`              | Writing/reviewing Elm, Model/Msg design         | "Elm", "Msg", "Elm update function", "Elm ports", "Elm decoder", "opaque type", "split this Elm module", "elm-review" |
 
 ## Composite workflows
 
@@ -60,7 +60,7 @@ Most real tasks need multiple skills. When a task matches a pattern below, load 
 | Testing campaign                | `/typescript`         | `/react`, `/react-router`                | "add test coverage", "write E2E tests"                     |
 | Performance optimization        | `/typescript`         | `/css-responsive`                  | "bundle analysis", "lighthouse", "CLS"                     |
 | Complex domain feature          | `/requirements`       | `/domain-design`, `/code-planning` | "new entity", "new domain concept", "multi-entity feature" |
-| Tauri desktop app               | `/tauri`              | `/rust`, frontend skill (`/react`, ...) | "Tauri app", "desktop app", "add a command", "src-tauri"   |
+| Tauri desktop app               | `/tauri`              | `/rust`, frontend skill (`/react`, ...) | "Tauri app", "desktop app", "add a Tauri command", "src-tauri"   |
 
 For full-stack features: check the project's `CLAUDE.md` for an end-to-end feature skill (e.g., `/new-feature`) that orchestrates the pipeline order.
 
