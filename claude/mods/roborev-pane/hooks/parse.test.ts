@@ -37,9 +37,18 @@ test('reads a clean review', () => {
   expect(parseReview('No issues found.\n\nSummary: Adds a test.')).toEqual({ findings: [], summary: 'Adds a test.' })
 })
 
+test('keeps the raw text of a findings review it cannot split', () => {
+  const output = '## Review Findings\n\n1. **Severity**: High\n   **Problem**: Leaks a token.\n\n## Summary\nAdds auth.\n'
+  const { findings, unparsed } = parseReview(output)
+  expect(findings).toHaveLength(0)
+  expect(unparsed).toBe(output.trim())
+})
+
 test('recognises the review commands and their job id', () => {
   expect(isReviewCommand('roborev wait 734 2>&1 | tail -5')).toBe(true)
   expect(isReviewCommand('roborev list')).toBe(false)
+  expect(isReviewCommand('git fetch && roborev show --job 734')).toBe(true)
+  expect(isReviewCommand("grep -rn 'roborev show' claude/")).toBe(false)
   expect(jobIdOf('roborev wait 734')).toBe(734)
   expect(jobIdOf('roborev show --job 734 --json')).toBe(734)
   expect(jobIdOf('roborev show')).toBeUndefined()

@@ -8,7 +8,8 @@ const field = (block: string, name: string): string => {
   return match?.[1]?.trim() ?? ''
 }
 
-export function parseReview(output: string): { findings: Finding[]; summary: string } {
+// `unparsed` holds the whole text when it is not a clean review but no finding could be read from it.
+export function parseReview(output: string): { findings: Finding[]; summary: string; unparsed?: string } {
   const text = output.trim()
   if (text.startsWith('No issues found')) {
     return { findings: [], summary: text.replace(/^No issues found\.?\s*(Summary:\s*)?/, '').trim() }
@@ -23,6 +24,7 @@ export function parseReview(output: string): { findings: Finding[]; summary: str
       fix: field(block, 'Fix'),
     }))
     .filter(finding => finding.severity || finding.problem)
+  if (findings.length === 0) return { findings, summary: summary.trim(), unparsed: text }
   return { findings, summary: summary.trim() }
 }
 
@@ -32,4 +34,5 @@ export function jobIdOf(command: string): number | undefined {
   return match ? Number(match[1]) : undefined
 }
 
-export const isReviewCommand = (command: string): boolean => /\broborev\s+(?:wait|show)\b/.test(command)
+// Only where `roborev` is the command itself: at the start, or after `|`, `;`, `&&` or `(`.
+export const isReviewCommand = (command: string): boolean => /(?:^|[|;&(])\s*roborev\s+(?:wait|show)\b/.test(command)

@@ -13,6 +13,7 @@ const decisions = atom({ plugin: 'roborev-pane', key: 'decisions' } as const, {}
 const explanations = atom({ plugin: 'roborev-pane', key: 'explanations' } as const, {})
 const position = atom({ plugin: 'roborev-pane', key: 'position' } as const, 0)
 const isRawShown = atom({ plugin: 'roborev-pane', key: 'isRawShown' } as const, false)
+const saved = atom({ plugin: 'roborev-pane', key: 'saved' } as const, {})
 
 const EXPLAIN_DESCRIPTION = `Writes your explanation of each finding of the roborev review shown in the roborev pane.
 Call it after you read the code and check each claim, in place of putting the findings in the chat.
@@ -68,9 +69,23 @@ async function show($: EngineInterface, jobId?: number): Promise<boolean> {
   const previous = await read($, review)
   await update($, review, () => fetched)
   if (previous?.jobId !== fetched.jobId) {
-    await update($, decisions, () => ({}))
-    await update($, explanations, () => ({}))
-    await update($, position, () => 0)
+    // Park the walkthrough of the job left behind, and pick up the new job's where it stopped.
+    const all = await read($, saved)
+    const stash = previous
+      ? {
+          ...all,
+          [String(previous.jobId)]: {
+            decisions: await read($, decisions),
+            explanations: await read($, explanations),
+            position: await read($, position),
+          },
+        }
+      : all
+    await update($, saved, () => stash)
+    const resumed = stash[String(fetched.jobId)]
+    await update($, decisions, () => resumed?.decisions ?? {})
+    await update($, explanations, () => resumed?.explanations ?? {})
+    await update($, position, () => resumed?.position ?? 0)
     await update($, isRawShown, () => false)
   }
   await $.ui.open({ id: PANE, title: TITLE })
@@ -104,22 +119,38 @@ export const register: Register = on => {
     if (!current || current.jobId !== input.jobId) {
       return { result: `The pane shows ${current ? `job ${current.jobId}` : 'no review'}, not job ${input.jobId}. Nothing was written.` }
     }
+    const inRange = input.findings.filter(({ number }) => number >= 1 && number <= current.findings.length)
+    const skipped = input.findings.filter(finding => !inRange.includes(finding)).map(({ number }) => number)
     await update($, explanations, all => {
       const written = { ...all }
-      for (const { number, problem, explanation, recommendation, reason } of input.findings) {
+      for (const { number, problem, explanation, recommendation, reason } of inRange) {
         written[String(number - 1)] = { problem, explanation, recommendation, reason }
       }
       return written
     })
     await update($, isRawShown, () => false)
     await $.ui.open({ id: PANE, title: TITLE })
-    return { result: `Wrote ${input.findings.length} explanation(s) into the roborev pane for job ${input.jobId}.` }
+    const note = skipped.length
+      ? ` Skipped finding number(s) ${skipped.join(', ')}: the review has ${current.findings.length} finding(s).`
+      : ''
+    return { result: `Wrote ${inRange.length} explanation(s) into the roborev pane for job ${input.jobId}.${note}` }
   })
 
   on('ui.render', { component: 'Pane', requestId: PANE }, async ($, e) => {
     const { Box, Text, Button, Markdown } = $.ui.resolve(e)
     const current = await read($, review)
     if (!current) return <Text dimColor>No roborev review loaded. Run /roborev-pane.</Text>
+    if (current.unparsed) {
+      return (
+        <Box flexDirection="column" gap={1}>
+          <Text bold>
+            Job {current.jobId} · {current.branch} ·{' '}
+            <Text color="warning">findings not parsed — roborev's own text</Text>
+          </Text>
+          <Markdown text={current.unparsed} />
+        </Box>
+      )
+    }
     if (current.findings.length === 0) {
       return (
         <Box flexDirection="column" gap={1}>

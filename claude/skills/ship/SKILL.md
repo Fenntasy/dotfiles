@@ -27,7 +27,8 @@ Where this skill and those rules disagree, the rules win.
    `type/short-description` branch first. If already on a feature branch,
    check its MR/PR state (`gh pr view --json state,headRefOid` /
    `glab mr view --output json`, field `diff_refs.head_sha` /
-   `tea api 'repos/{owner}/{repo}/pulls/<n>'`, fields `merged`, `head.sha`).
+   `tea api 'repos/{owner}/{repo}/pulls?state=all'`, the entry whose
+   `head.ref` is the branch, fields `merged`, `head.sha`).
    Merged and the local branch tip equals the merged head SHA → all
    local work landed: switch to main, pull, delete the stale branch
    (`git branch -D` — safe because the SHA check just proved the work
@@ -77,12 +78,15 @@ failing gate stops the ritual: report the failure, do not commit around it.
    conflict is about, and stop for the user's go-ahead before resolving.
 3. After any rebase, re-run the verification gates (step 2) — a clean rebase
    can still break the build.
-4. Push with `--force-with-lease` (add `-u` when no upstream) — the lease
+4. **Local CI.** When the project's CLAUDE.md says CI runs on the
+   contributor's machine and reports commit statuses, it is a push gate:
+   run it on the final commit now, before pushing — red stops the ritual.
+5. Push with `--force-with-lease` (add `-u` when no upstream) — the lease
    is the safety net, don't add redundant pulls before it. A lease
    rejection means the remote moved unexpectedly: stop and report. If the
    push fails because the remote branch was deleted, re-check the PR/MR
    state (`gh pr view --json state,headRefOid` /
-   `glab mr view --output json` / `tea api 'repos/{owner}/{repo}/pulls/<n>'`).
+   `glab mr view --output json` / `tea` lookup by `head.ref` as in Preflight).
    If a merged/closed PR explains the deletion, apply the
    Preflight branch-state logic: tip equals the merged head SHA → all
    work landed, clean up per Preflight; otherwise stop and report both
@@ -90,10 +94,8 @@ failing gate stops the ritual: report the failure, do not commit around it.
    (typically: fresh branch from updated main, cherry-pick the local
    commits). Re-push with `-u` only when no merged/closed PR explains
    the deletion.
-5. **Local CI.** When the project's CLAUDE.md says CI runs on the
-   contributor's machine and reports commit statuses, it is a push gate:
-   run it on the final commit before pushing (red stops the ritual), and
-   post its statuses right after the push, before the PR step.
+6. **Local CI statuses.** If step 4 ran local CI, post its statuses right
+   after the push, before the PR step.
 
 ## 6. MR / PR
 

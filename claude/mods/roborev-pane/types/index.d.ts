@@ -5,6 +5,8 @@ export type Review = {
   branch: string;
   findings: Finding[];
   summary: string;
+  /** The whole review text, set when it has findings the parser could not read. */
+  unparsed?: string;
 };
 
 export type Decision = 'Fix' | 'Dismiss' | 'Discuss' | 'Skip';
@@ -15,6 +17,8 @@ export type Decision = 'Fix' | 'Dismiss' | 'Discuss' | 'Skip';
  * absent from explanations written before it existed.
  */
 export type Explanation = { problem?: string; explanation: string; recommendation: Decision; reason: string };
+
+export type JobState = { decisions: Record<string, Decision>; explanations: Record<string, Explanation>; position: number };
 
 declare module 'claude-code' {
   interface PluginState {
@@ -28,6 +32,8 @@ declare module 'claude-code' {
       position: number;
       /** Whether the finding on screen shows roborev's own text. */
       isRawShown: boolean;
+      /** The walkthrough state of jobs the pane moved away from, keyed by job id. */
+      saved: Record<string, JobState>;
     };
   }
 }
