@@ -4,7 +4,7 @@ description: |
   Tool-agnostic conventions for writing issues and PRs.
   Covers: issue structure, PR format, naming consistency, lifecycle.
   Use when: creating issues, writing PR descriptions, filing bugs, or planning work items.
-  For merge gates and push workflow see `claude/rules/git-conventions.md`.
+  For push workflow see `/ship`; for merge gates see `/ship` §7.
 version: 1.0.0
 date: 2026-03-03
 user-invocable: true
