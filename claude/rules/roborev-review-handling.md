@@ -10,8 +10,9 @@ branching, see `claude/rules/git-conventions.md`.
 - **Default to interactive.** When a roborev review exists or completes, present
   *every* finding to the user — severity, location, the reviewer's problem, and
   your recommendation with rationale — then let the user decide each one
-  (Fix / Dismiss / Discuss / Skip) via `AskUserQuestion`. Reflect and recommend;
-  the user decides.
+  (Fix / Dismiss / Discuss / Skip) via `AskUserQuestion`, or via the roborev
+  pane's buttons when that mod is loaded. Reflect and recommend; the user
+  decides.
 - **Change no code until the user decides.** Never edit, fix, or "address" a
   finding before the user has chosen what to do with it.
 - **Never batch-resolve unless told.** Only fix findings without per-finding
@@ -22,12 +23,14 @@ branching, see `claude/rules/git-conventions.md`.
 - **Never schedule or background review actions** that fire without a checkpoint
   (no cron/wakeup that auto-fixes or auto-pushes after a review).
 - **Don't bury findings.** Surface them as findings for decision — not folded
-  into a summary with your verdicts already applied. The reviewer's complete
-  text must travel inside the decision prompt itself (the `AskUserQuestion`
-  question text) — tool results and read files are not visible to the user,
-  and message text written before a tool call in the same turn may not
-  render. A paraphrase at decision time is a buried finding. Formatting for
-  readability is fine; trimming or rewording is not.
+  into a summary with your verdicts already applied. At decision time the
+  reviewer's complete text, untrimmed and unreworded, must be reachable on the
+  decision surface itself: inside the decision prompt (the `AskUserQuestion`
+  question text), or one action away on a surface built for it (the roborev
+  pane's "Show roborev text" toggle). Only in the second case may your
+  explanation lead in place of the verbatim text. Tool results and read files
+  are not visible to the user, and message text written before a tool call in
+  the same turn may not render — neither counts as reachable.
 
 ## Why
 

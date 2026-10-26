@@ -1,0 +1,6 @@
+{
+  "name": "roborev-pane",
+  "version": "0.1.0",
+  "description": "Shows the latest roborev review in a pane, with Fix/Dismiss/Discuss/Skip buttons per finding",
+  "types": "./types/index.d.ts"
+}
