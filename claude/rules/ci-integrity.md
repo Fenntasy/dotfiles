@@ -1,11 +1,3 @@
----
-paths:
-  - "**/.github/workflows/**"
-  - "**/.gitlab-ci.yml"
-  - "**/*.gitlab-ci.yml"
-  - "**/.gitlab/ci/**"
----
-
 # CI Integrity
 
 CI must reflect reality. Green means it works — no exceptions.

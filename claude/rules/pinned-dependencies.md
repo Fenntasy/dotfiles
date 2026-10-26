@@ -1,6 +1,4 @@
 ---
-paths:
-  - "**/package.json"
 description: Apply when installing or adding any npm/yarn/pnpm package dependency
 ---
 

@@ -1,6 +1,6 @@
 ---
 paths:
-  - "**/*.{ts,tsx,js,jsx,mjs,cjs,py,rs,go,java,kt,swift,rb,php}"
+  - "**/*.{ts,tsx,js,jsx,mjs,cjs,py,rs,go,java,kt,swift,rb,php,vue,svelte,astro,cs,scala,ex,exs,dart,lua,sh}"
 ---
 
 # External URL Fetch
