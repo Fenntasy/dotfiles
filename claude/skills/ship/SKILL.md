@@ -26,7 +26,8 @@ Where this skill and those rules disagree, the rules win.
 1. **Branch state.** Never ship from `main`/`master` — create a
    `type/short-description` branch first. If already on a feature branch,
    check its MR/PR state (`gh pr view --json state,headRefOid` /
-   `glab mr view --output json`, field `diff_refs.head_sha`).
+   `glab mr view --output json`, field `diff_refs.head_sha` /
+   `tea api 'repos/{owner}/{repo}/pulls/<n>'`, fields `merged`, `head.sha`).
    Merged and the local branch tip equals the merged head SHA → all
    local work landed: switch to main, pull, delete the stale branch
    (`git branch -D` — safe because the SHA check just proved the work
@@ -38,7 +39,9 @@ Where this skill and those rules disagree, the rules win.
    staged. Untracked scratch files (plans, notes) stay out unless the user
    says otherwise. Never `git add -f`.
 3. **Host detection.** `git remote get-url origin` → GitLab repos use `glab`,
-   GitHub repos use `gh`. All later steps follow this choice.
+   GitHub repos use `gh`, Forgejo/Gitea repos use `tea` (`tea api` for what
+   it lacks — it exits 0 on HTTP errors, so read the response). All later
+   steps follow this choice.
 
 ## 2. Verify
 
@@ -79,13 +82,18 @@ failing gate stops the ritual: report the failure, do not commit around it.
    rejection means the remote moved unexpectedly: stop and report. If the
    push fails because the remote branch was deleted, re-check the PR/MR
    state (`gh pr view --json state,headRefOid` /
-   `glab mr view --output json`). If a merged/closed PR explains the deletion, apply the
+   `glab mr view --output json` / `tea api 'repos/{owner}/{repo}/pulls/<n>'`).
+   If a merged/closed PR explains the deletion, apply the
    Preflight branch-state logic: tip equals the merged head SHA → all
    work landed, clean up per Preflight; otherwise stop and report both
    SHAs — never delete the branch, the user picks the recovery
    (typically: fresh branch from updated main, cherry-pick the local
    commits). Re-push with `-u` only when no merged/closed PR explains
    the deletion.
+5. **Local CI.** When the project's CLAUDE.md says CI runs on the
+   contributor's machine and reports commit statuses, it is a push gate:
+   run it on the final commit before pushing (red stops the ritual), and
+   post its statuses right after the push, before the PR step.
 
 ## 6. MR / PR
 
@@ -98,19 +106,21 @@ failing gate stops the ritual: report the failure, do not commit around it.
    `glab mr create`; on an existing MR, add with
    `glab mr update --assignee "+<username>"` — `update --assignee`
    *replaces* the assignee list unless the username is prefixed with `+`.
+   Forgejo: `--assignees <login>` on `tea pr create` (the login from
+   `tea logins list`).
 3. **Template first.** GitLab: fetch the repo's default description template
    through the API —
    `glab api "projects/:id/templates/merge_requests/default" | jq -r .content`
    — and follow its structure. GitHub: read
-   `.github/pull_request_template.md`. Don't reconstruct a template from
-   memory.
+   `.github/pull_request_template.md`. Forgejo: `.forgejo/` or `.gitea/`
+   `pull_request_template.md`. Don't reconstruct a template from memory.
 4. Body is plain markdown, directly copyable: concise motivation, what
    changed, how it was tested. Only claim verification that actually
    happened; list still-pending manual checks explicitly.
 5. No checkbox items that can only be checked after merge.
 6. Reference tickets/issues per the project's tracker conventions (some
    projects track in Jira and don't link repo issues — when unsure, ask).
-7. Pass long bodies via heredoc directly to `glab`/`gh` — no temp-file
+7. Pass long bodies via heredoc directly to `glab`/`gh`/`tea` — no temp-file
    round-trips.
 
 ## 7. Merge + cleanup (only on explicit ask)

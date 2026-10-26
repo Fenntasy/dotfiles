@@ -6,7 +6,7 @@
 - If on `main` or `master` with uncommitted changes, create a branch before committing
 - Branch naming: `type/short-description` (lowercase, hyphens, no spaces)
 - Derive the branch name from the changes (e.g. `feat/add-libpq`, `fix/shell-startup`)
-- Never commit on top of a branch whose PR was merged or closed — PRs can be merged outside your control; check first (`gh pr view --json state` / `glab mr view --output json`; no PR/MR yet is a normal outcome for a fresh branch), recover per `/ship` preflight
+- Never commit on top of a branch whose PR was merged or closed — PRs can be merged outside your control; check first (`gh pr view --json state` / `glab mr view --output json` / Forgejo `tea api 'repos/{owner}/{repo}/pulls/<n>'`; no PR/MR yet is a normal outcome for a fresh branch), recover per `/ship` preflight
 
 ## Commit conventions
 
@@ -20,13 +20,13 @@
 
 - Never push directly to `main` or `master`
 - **Every push requires a roborev review** — run `roborev review --branch --agent claude-code` before pushing; findings are handled per `/roborev` and `claude/rules/roborev-review-handling.md`. The gate is not an authorization to auto-resolve
-- **Roborev gate** — before `git push` or `gh pr merge`, check `roborev list`. Do not proceed when: no reviews exist for the branch, reviews are still running/queued, or no `claude-code` review is `done`
+- **Roborev gate** — before `git push` or merging a PR, check `roborev list`. Do not proceed when: no reviews exist for the branch, reviews are still running/queued, or no `claude-code` review is `done`
 - Push mechanics (fetch, rebase, `--force-with-lease`) live in `/ship` — stop and report on rebase conflicts, lease rejections, or failing checks; never auto-resolve or retry blindly
 - After every push, ensure a PR exists and its title/body reflect all commits on the branch vs main (mechanics and body format per `/ship` and `/project-management`)
 
 ## Issue linking
 
-Applies in repos that track work in GitHub issues — follow the repo's observed convention (check recent PRs) rather than forcing issues onto repos that don't use them.
+Applies in repos that track work in their host's issues (GitHub, Forgejo) — follow the repo's observed convention (check recent PRs) rather than forcing issues onto repos that don't use them.
 
 - Reference at least one issue per PR
 - Multi-concern PRs: each distinct fix or feature gets its own issue
@@ -50,10 +50,10 @@ Before merging any PR — and when assessing whether a PR is mergeable — **all
 - Zero unresolved review threads
 - **Roborev reviews complete** — run `roborev list` and verify at least one `claude-code` review is `done` and no reviews are `running` or `queued`. If reviews are missing, trigger them. Check this proactively when reporting merge readiness
 - **Test plan complete** — read the PR body and verify every test plan item is checked (`[x]`). If any item is unchecked, run the verification yourself or ask the user. Never merge with unchecked items
-- CI passes — use `gh pr checks <number> --repo {owner}/{repo} --watch` to confirm
+- CI passes — hosted CI: `gh pr checks <number> --repo {owner}/{repo} --watch`. A project whose CI runs locally (its `CLAUDE.md` says so): its run passed on the PR's head commit, its statuses are posted, and that commit's combined status is `success`
 - PR is still in `OPEN` state
 - All session todos completed — never merge with pending or in-progress task items
-- PR body is up to date — check off verified test plan items (`[x]`), update summary/title if commits changed. Do this via `gh pr edit` before merging
+- PR body is up to date — check off verified test plan items (`[x]`), update summary/title if commits changed. Do this via `gh pr edit` / `tea pr edit` before merging
 
 ## Dangerous flags
 
