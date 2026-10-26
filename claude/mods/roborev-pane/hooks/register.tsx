@@ -109,7 +109,10 @@ export const register: Register = on => {
 
   on('tool.call', { tool: 'Bash' }, async ($, e, next) => {
     const result = await next(e)
-    if (isReviewCommand(e.command)) await show($, jobIdOf(e.command))
+    // The pane must never affect the Bash result.
+    try {
+      if (isReviewCommand(e.command)) await show($, jobIdOf(e.command))
+    } catch {}
     return result
   })
 
@@ -118,6 +121,11 @@ export const register: Register = on => {
     const current = await read($, review)
     if (!current || current.jobId !== input.jobId) {
       return { result: `The pane shows ${current ? `job ${current.jobId}` : 'no review'}, not job ${input.jobId}. Nothing was written.` }
+    }
+    if (current.unparsed) {
+      return {
+        result: `The pane could not parse the findings of job ${input.jobId} and has no decision buttons. Nothing was written. Walk the findings with AskUserQuestion instead.`,
+      }
     }
     const inRange = input.findings.filter(({ number }) => number >= 1 && number <= current.findings.length)
     const skipped = input.findings.filter(finding => !inRange.includes(finding)).map(({ number }) => number)
@@ -170,8 +178,10 @@ export const register: Register = on => {
     if (!finding) return <Text dimColor>No finding at {index + 1}.</Text>
     const explanation = explained[String(index)]
     const showsRaw = (await read($, isRawShown)) || !explanation
+    // Discuss and Skip come back for a re-ask, so only Fix and Dismiss close a finding.
+    const isFinal = (decision?: Decision) => decision === 'Fix' || decision === 'Dismiss'
     const decided = chosen[String(index)]
-    const decidedCount = Object.keys(chosen).length
+    const decidedCount = Object.values(chosen).filter(isFinal).length
 
     const goTo = async (target: number) => {
       await update($, position, () => Math.max(0, Math.min(total - 1, target)))
@@ -180,7 +190,7 @@ export const register: Register = on => {
     const decide = async (decision: Decision) => {
       const all = { ...chosen, [String(index)]: decision }
       await update($, decisions, () => all)
-      const nextOpen = current.findings.findIndex((_, other) => other !== index && !all[String(other)])
+      const nextOpen = current.findings.findIndex((_, other) => other !== index && !isFinal(all[String(other)]))
       if (nextOpen !== -1) await goTo(nextOpen)
       await $.prompt.submit({
         text: `Roborev job ${current.jobId}, finding ${index + 1} (${finding.severity}, ${finding.location}): ${decision}`,
@@ -228,12 +238,13 @@ export const register: Register = on => {
             </Box>
           )}
         </Box>
-        {decided ? (
+        {isFinal(decided) ? (
           <Text bold color="success">
             ✓ Decided: {decided}
           </Text>
         ) : (
           <Box flexDirection="row" gap={1}>
+            {decided && <Text dimColor>Last: {decided}</Text>}
             {DECISIONS.map(decision => (
               <Button
                 key={`decide-${decision}`}

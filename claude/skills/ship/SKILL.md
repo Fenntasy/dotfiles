@@ -27,8 +27,8 @@ Where this skill and those rules disagree, the rules win.
    `type/short-description` branch first. If already on a feature branch,
    check its MR/PR state (`gh pr view --json state,headRefOid` /
    `glab mr view --output json`, field `diff_refs.head_sha` /
-   `tea api 'repos/{owner}/{repo}/pulls?state=all'`, the entry whose
-   `head.ref` is the branch, fields `merged`, `head.sha`).
+   `tea api 'repos/{owner}/{repo}/pulls/<base>/<branch>'` (the PR by base
+   and head, no paging), fields `state`, `merged`, `head.sha`).
    Merged and the local branch tip equals the merged head SHA → all
    local work landed: switch to main, pull, delete the stale branch
    (`git branch -D` — safe because the SHA check just proved the work
@@ -86,7 +86,7 @@ failing gate stops the ritual: report the failure, do not commit around it.
    rejection means the remote moved unexpectedly: stop and report. If the
    push fails because the remote branch was deleted, re-check the PR/MR
    state (`gh pr view --json state,headRefOid` /
-   `glab mr view --output json` / `tea` lookup by `head.ref` as in Preflight).
+   `glab mr view --output json` / `tea api` by base and head as in Preflight).
    If a merged/closed PR explains the deletion, apply the
    Preflight branch-state logic: tip equals the merged head SHA → all
    work landed, clean up per Preflight; otherwise stop and report both
@@ -109,13 +109,16 @@ failing gate stops the ritual: report the failure, do not commit around it.
    `glab mr update --assignee "+<username>"` — `update --assignee`
    *replaces* the assignee list unless the username is prefixed with `+`.
    Forgejo: `--assignees <login>` on `tea pr create` (the login from
-   `tea logins list`).
+   `tea logins list`); on an existing PR,
+   `tea pulls edit <n> --add-assignees <login>` (additive).
 3. **Template first.** GitLab: fetch the repo's default description template
    through the API —
    `glab api "projects/:id/templates/merge_requests/default" | jq -r .content`
    — and follow its structure. GitHub: read
-   `.github/pull_request_template.md`. Forgejo: `.forgejo/` or `.gitea/`
-   `pull_request_template.md`. Don't reconstruct a template from memory.
+   `.github/pull_request_template.md`. Forgejo: look for
+   `pull_request_template.md` in any case (`find . -maxdepth 2 -iname
+   'pull_request_template.md'`) under `.forgejo/`, `.gitea/`, `.github/`
+   or the repo root. Don't reconstruct a template from memory.
 4. Body is plain markdown, directly copyable: concise motivation, what
    changed, how it was tested. Only claim verification that actually
    happened; list still-pending manual checks explicitly.

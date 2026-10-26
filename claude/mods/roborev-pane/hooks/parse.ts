@@ -30,9 +30,13 @@ export function parseReview(output: string): { findings: Finding[]; summary: str
 
 /** The job id a `roborev wait|show` command names, if any. */
 export function jobIdOf(command: string): number | undefined {
-  const match = /\broborev\s+(?:wait|show)\b(?:\s+--job)?(?:\s+--json)?\s+(\d+)\b/.exec(command)
+  const args = /\broborev\s+(?:wait|show)\b([^|;&\n]*)/.exec(command)?.[1] ?? ''
+  // `--job N` in any flag order, else the first bare number argument.
+  const match = /--job\s+(\d+)\b/.exec(args) ?? /(?:^|\s)(\d+)(?=\s|$)/.exec(args)
   return match ? Number(match[1]) : undefined
 }
 
-// Only where `roborev` is the command itself: at the start, or after `|`, `;`, `&&` or `(`.
-export const isReviewCommand = (command: string): boolean => /(?:^|[|;&(])\s*roborev\s+(?:wait|show)\b/.test(command)
+// Only where `roborev` is the command itself: at the start of a line, or after `|`, `;`, `&&` or `(`,
+// past any `VAR=value` prefixes.
+export const isReviewCommand = (command: string): boolean =>
+  /(?:^|[|;&(\n])\s*(?:\w+=\S*\s+)*roborev\s+(?:wait|show)\b/.test(command)
