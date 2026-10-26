@@ -41,6 +41,11 @@ test('splits findings separated only by a blank line', () => {
   expect(findings[1]?.severity).toBe('Medium')
 })
 
+test('splits off a lowercase Summary heading', () => {
+  const { summary } = parseReview(OUTPUT.replace('## Summary', '## summary'))
+  expect(summary).toBe('Titles are stored with no-break spaces.')
+})
+
 test('reads a clean review', () => {
   expect(parseReview('No issues found.\n\nSummary: Adds a test.')).toEqual({ findings: [], summary: 'Adds a test.' })
 })

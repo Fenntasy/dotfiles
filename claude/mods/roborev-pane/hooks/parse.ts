@@ -1,7 +1,7 @@
 import type { Finding } from '../types'
 
 // roborev's review text: `## Review Findings`, findings as `- **Field**: value` lists
-// separated by `---` or only by a blank line, then `## Summary`; or `No issues found.` and `Summary: …`.
+// separated by `---` or only by a blank line, then `## Summary` (any case); or `No issues found.` and `Summary: …`.
 
 const field = (block: string, name: string): string => {
   const match = new RegExp(`- \\*\\*${name}\\*\\*:\\s*([\\s\\S]*?)(?=\\n- \\*\\*\\w+\\*\\*:|$)`).exec(block)
@@ -14,7 +14,7 @@ export function parseReview(output: string): { findings: Finding[]; summary: str
   if (text.startsWith('No issues found')) {
     return { findings: [], summary: text.replace(/^No issues found\.?\s*(Summary:\s*)?/, '').trim() }
   }
-  const [body = '', summary = ''] = text.replace(/^## Review Findings\s*/i, '').split(/\n## Summary\s*\n/)
+  const [body = '', summary = ''] = text.replace(/^## Review Findings\s*/i, '').split(/\n## Summary\s*\n/i)
   const findings = body
     .split(/\n-{3,}\n|\n(?=\s*- \*\*Severity\*\*:)/)
     .map(block => ({
