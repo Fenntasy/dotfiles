@@ -1,4 +1,9 @@
 {
+  "includeCoAuthoredBy": false,
+  "model": "opus[1m]",
+  "env": {
+    "CLAUDE_CODE_PLUGIN_DIRS": "~/.dotfiles/claude/mods/roborev-pane"
+  },
   "hooks": {
     "Notification": [
       {
@@ -17,8 +22,11 @@
     "command": "~/.claude/statusline.sh"
   },
   "enabledPlugins": {
+    "frontend-design@claude-plugins-official": true,
     "playwright-skill@playwright-skill": true,
-    "frontend-design@claude-plugins-official": true
+    "stripe@claude-plugins-official": true,
+    "i-have-adhd@i-have-adhd": true,
+    "code-simplifier@claude-plugins-official": true
   },
   "extraKnownMarketplaces": {
     "playwright-skill": {
@@ -26,7 +34,15 @@
         "source": "github",
         "repo": "lackeyjb/playwright-skill"
       }
+    },
+    "i-have-adhd": {
+      "source": {
+        "source": "github",
+        "repo": "ayghri/i-have-adhd"
+      }
     }
   },
-  "theme": "light"
+  "tui": "fullscreen",
+  "theme": "light",
+  "agentPushNotifEnabled": true
 }
