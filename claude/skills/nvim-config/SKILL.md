@@ -8,6 +8,7 @@ description: >
 version: 1.0.0
 date: 2026-04-02
 user-invocable: true
+disable-model-invocation: true
 argument-hint: "e.g. 'shortcut for file search' or 'which formatter runs on save'"
 context:
   - config/nvim/lua/core/keymaps.lua

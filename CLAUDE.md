@@ -40,7 +40,7 @@ When adding a new config file, place it here and run `rcup` to activate it.
 
 ## Claude configuration
 
-Rules in `claude/rules/` are global instructions loaded automatically for all projects. Skills in `claude/skills/` are loaded on demand (by file pattern or task intent) per the routing table in `claude/rules/skill-triggers.md`.
+Rules in `claude/rules/` are global instructions loaded automatically for all projects. Skills in `claude/skills/` are loaded on demand, matched by the `description` frontmatter of each skill.
 
 When editing any file under `claude/` or `memory/`, load the `/claude-authoring` skill first.
 

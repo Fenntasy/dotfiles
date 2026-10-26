@@ -1,3 +1,8 @@
+---
+paths:
+  - "**/*.{ts,tsx,js,jsx,mjs,cjs,py,rs,go,java,kt,swift,rb,php}"
+---
+
 # External URL Fetch
 
 When the server fetches a URL that originates from an external payload (webhook body, API response, user input, queue message):

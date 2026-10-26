@@ -1,3 +1,8 @@
+---
+paths:
+  - "**/*.{ts,tsx,js,jsx,mjs,cjs,py,rs,go,java,kt,swift,rb,php}"
+---
+
 # PII in Logs
 
 When writing `console.log`, `console.warn`, `console.error`, or any logging call that includes user-provided data:

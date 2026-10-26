@@ -74,8 +74,7 @@ Broken links between config files that cause hallucinated guidance.
 **Method:** Automated checks handle existence verification. AI audit verifies semantic correctness — does the referenced section still say what the referencing file assumes it says?
 
 **Checklist:**
-- [ ] `skill-triggers.md` — all existing skills are routed (no orphaned skills)
-- [ ] `skill-triggers.md` — composite workflows reference valid combinations
+- [ ] Skill `description` frontmatter — each skill states when to use it (no orphaned skills)
 - [ ] CLAUDE.md rules index — matches actual rule files and their scoping
 - [ ] Bidirectional cross-references — if A references B, B references A
 
@@ -88,7 +87,7 @@ Launch parallel subagents for independent research. Split by project layer — c
 - **Backend agent** — handlers, models, data access, auth, tests
 - **Frontend agent** — routes, components, utilities, tests, config
 - **Infrastructure agent** — build config, CI/CD, Docker, hooks
-- **Skills/rules agent** — all rules, all skills, skill-triggers, cross-references
+- **Skills/rules agent** — all rules, all skills, cross-references
 
 ### Codebase Quality
 

@@ -17,7 +17,7 @@ argument-hint: "optional: 'no-mr' to stop after push, 'merge' to include merge +
 
 Drive a finished change from working tree to reviewed, pushed, MR'd state.
 This skill orchestrates; the non-negotiable constraints live in
-`claude/rules/git-conventions.md` (branching, pushing, merge gates) and
+`claude/rules/git-conventions.md` (branching, commits, dangerous flags) and
 `claude/rules/roborev-review-handling.md` (findings are the user's decisions).
 Where this skill and those rules disagree, the rules win.
 
@@ -125,15 +125,41 @@ failing gate stops the ritual: report the failure, do not commit around it.
 5. No checkbox items that can only be checked after merge.
 6. Reference tickets/issues per the project's tracker conventions (some
    projects track in Jira and don't link repo issues — when unsure, ask).
-7. Pass long bodies via heredoc directly to `glab`/`gh`/`tea` — no temp-file
+   In repos that track work in their host's issues (GitHub, Forgejo — check
+   recent PRs):
+   - Reference at least one issue per PR; each distinct fix or feature in a
+     multi-concern PR gets its own issue
+   - `Fixes #N` (auto-closes on merge) or `Addresses #N` (no auto-close)
+   - Untracked work → create the issue before or at PR time
+   - Branch names may include the issue number: `fix/42-shell-startup`
+7. **Norauto repos** (`~/Workspace/norauto/`) with no repo template: use
+   these `##` sections in order — **Motivation and Context**, **Solution**,
+   **Related Ticket** (Jira URL — create the ticket if none exists),
+   **How Has This Been Tested?**, **Screenshots** (omit if not relevant),
+   **Types of changes** (checkbox list: Chore / Bug fix / New feature /
+   Breaking change).
+8. Pass long bodies via heredoc directly to `glab`/`gh`/`tea` — no temp-file
    round-trips.
 
 ## 7. Merge + cleanup (only on explicit ask)
 
 Never merge on your own initiative. When the user says merge:
 
-1. Check every merge gate from `claude/rules/git-conventions.md`: reviews
-   done, threads resolved, CI green, test plan complete, PR body current.
+1. Check every merge gate — **all** must hold, also when merely reporting
+   whether a PR is mergeable:
+   - Zero unresolved review threads
+   - **Roborev complete** — `roborev list` shows at least one `claude-code`
+     review `done` and none `running`/`queued`. Missing → trigger them
+   - **Test plan complete** — every test plan item in the body is `[x]`.
+     Unchecked → run the verification yourself or ask the user
+   - CI passes — hosted CI: `gh pr checks <number> --repo {owner}/{repo}
+     --watch`. A project whose CI runs locally (its `CLAUDE.md` says so):
+     its run passed on the PR's head commit, its statuses are posted, and
+     that commit's combined status is `success`
+   - PR/MR still `OPEN`
+   - All session todos completed
+   - Body current — check off verified items, update title/summary if
+     commits changed (`gh pr edit` / `tea pr edit`) before merging
 2. Squash merge. Then: switch to main, pull, delete the remote branch and
    the local one (`git branch -D` — after a squash merge `-d` refuses even
    though the work landed).

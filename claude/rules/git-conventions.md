@@ -19,41 +19,14 @@
 ## Pushing
 
 - Never push directly to `main` or `master`
-- **Every push requires a roborev review** — run `roborev review --branch --agent claude-code` before pushing; findings are handled per `/roborev` and `claude/rules/roborev-review-handling.md`. The gate is not an authorization to auto-resolve
-- **Roborev gate** — before `git push` or merging a PR, check `roborev list`. Do not proceed when: no reviews exist for the branch, reviews are still running/queued, or no `claude-code` review is `done`
-- Push mechanics (fetch, rebase, `--force-with-lease`) live in `/ship` — stop and report on rebase conflicts, lease rejections, or failing checks; never auto-resolve or retry blindly
-- After every push, ensure a PR exists and its title/body reflect all commits on the branch vs main (mechanics and body format per `/ship` and `/project-management`)
+- **Every push requires a roborev review** (`roborev review --branch --agent claude-code`). Before `git push` or merging a PR, check `roborev list`; do not proceed when no reviews exist for the branch, reviews are still running/queued, or no `claude-code` review is `done`. Findings are handled per `claude/rules/roborev-review-handling.md` — the gate is not an authorization to auto-resolve
+- Stop and report on rebase conflicts, lease rejections, or failing checks — never auto-resolve or retry blindly
+- Push mechanics, MR/PR bodies, issue linking, and the Norauto MR template live in `/ship`
 
-## Issue linking
+## Merging
 
-Applies in repos that track work in their host's issues (GitHub, Forgejo) — follow the repo's observed convention (check recent PRs) rather than forcing issues onto repos that don't use them.
-
-- Reference at least one issue per PR
-- Multi-concern PRs: each distinct fix or feature gets its own issue
-- Use `Fixes #N` (auto-closes on merge) or `Addresses #N` (no auto-close) in the PR body
-- If work addresses something not yet tracked, create the issue before or at PR time
-- Branch names may include the issue number: `fix/42-shell-startup`
-
-## MR description (Norauto repos only)
-
-For projects under `~/Workspace/norauto/`, structure the MR body with these sections in order, each as a `##` heading: **Motivation and Context**, **Solution**, **Related Ticket** (Jira URL — create the ticket if none exists), **How Has This Been Tested?**, **Screenshots** (omit if not relevant), **Types of changes** (checkbox list: Chore / Bug fix / New feature / Breaking change).
-
-## Merge strategy
-
-- Always squash merge — never use merge or rebase strategies
-- Merge only on explicit ask — mechanics and post-merge cleanup (back to main, pull, delete remote and local branch) per `/ship`
-
-## Merge gates
-
-Before merging any PR — and when assessing whether a PR is mergeable — **all** of these must be true:
-
-- Zero unresolved review threads
-- **Roborev reviews complete** — run `roborev list` and verify at least one `claude-code` review is `done` and no reviews are `running` or `queued`. If reviews are missing, trigger them. Check this proactively when reporting merge readiness
-- **Test plan complete** — read the PR body and verify every test plan item is checked (`[x]`). If any item is unchecked, run the verification yourself or ask the user. Never merge with unchecked items
-- CI passes — hosted CI: `gh pr checks <number> --repo {owner}/{repo} --watch`. A project whose CI runs locally (its `CLAUDE.md` says so): its run passed on the PR's head commit, its statuses are posted, and that commit's combined status is `success`
-- PR is still in `OPEN` state
-- All session todos completed — never merge with pending or in-progress task items
-- PR body is up to date — check off verified test plan items (`[x]`), update summary/title if commits changed. Do this via `gh pr edit` / `tea pr edit` before merging
+- Always squash merge, and only on explicit ask
+- Never merge — or report a PR as mergeable — until every merge gate in `/ship` §7 holds
 
 ## Dangerous flags
 
