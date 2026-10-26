@@ -33,6 +33,19 @@ test('parses each finding and the summary', () => {
   expect(summary).toBe('Titles are stored with no-break spaces.')
 })
 
+test('splits findings separated only by a blank line', () => {
+  const output = OUTPUT.replace('## Review Findings', '## Review findings').replace('\n---\n', '')
+  const { findings } = parseReview(output)
+  expect(findings).toHaveLength(2)
+  expect(findings[0]?.fix).toBe('Return null unless the parsed value is an object.')
+  expect(findings[1]?.severity).toBe('Medium')
+})
+
+test('splits off a lowercase Summary heading', () => {
+  const { summary } = parseReview(OUTPUT.replace('## Summary', '## summary'))
+  expect(summary).toBe('Titles are stored with no-break spaces.')
+})
+
 test('reads a clean review', () => {
   expect(parseReview('No issues found.\n\nSummary: Adds a test.')).toEqual({ findings: [], summary: 'Adds a test.' })
 })
