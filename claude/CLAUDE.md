@@ -33,7 +33,7 @@ What counts as approval:
 - The user sees only your message text — not tool results, file reads, command output, or thinking — and only reliably the _final_ text of a turn: content written before a tool call in the same turn may not render. Anything the user must act on goes in the turn's final message, or inside the interaction itself (e.g. the question text of a dialog). Writing "as shown above" or "see the output" about a tool result is the tell: stop and paste the content instead.
 - If unsure whether something is a checkpoint, it is.
 
-How to ask: use `AskUserQuestion` for closed decisions with enumerable options (fix/dismiss a review finding, A-or-B tradeoffs); ask in prose for open-ended direction — "which approach", "what should this look like" — so the user can answer freely.
+How to ask: use `AskUserQuestion` for closed decisions with enumerable options (A-or-B tradeoffs; a review finding only when the roborev pane is unavailable — otherwise the pane leads, see `claude/rules/roborev-review-handling.md`); ask in prose for open-ended direction — "which approach", "what should this look like" — so the user can answer freely.
 
 When the user is describing a problem, asking a question, or thinking out loud rather than requesting a change, the deliverable is your assessment. Report your findings and stop. Don't apply a fix until they ask for one. Before running a command that changes system state (restarts, deletes, config edits), check that the evidence actually supports that specific action. A signal that pattern-matches to a known failure may have a different cause.
 
