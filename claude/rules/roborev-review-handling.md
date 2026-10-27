@@ -10,9 +10,16 @@ branching, see `claude/rules/git-conventions.md`.
 - **Default to interactive.** When a roborev review exists or completes, present
   *every* finding to the user — severity, location, the reviewer's problem, and
   your recommendation with rationale — then let the user decide each one
-  (Fix / Dismiss / Discuss / Skip) via `AskUserQuestion`, or via the roborev
-  pane's buttons when that mod is loaded. Reflect and recommend; the user
-  decides.
+  (Fix / Dismiss / Discuss / Skip) on the decision surface set by the next
+  rule. Reflect and recommend; the user decides.
+- **Prefer the pane when it's loaded.** Before you handle a review, check for
+  the `mcp__roborev-pane__explain` tool; a tool that is listed but deferred
+  counts as loaded — load its schema with `ToolSearch` first. When it is
+  present, decisions go through the roborev pane: call `explain` with your
+  per-finding analysis, then let the user decide with the pane's buttons. Fall
+  back to `AskUserQuestion` only when the tool is absent, or when `explain`
+  reports the pane could not parse the findings. Never pick `AskUserQuestion`
+  because you have not yet loaded the deferred tool.
 - **Change no code until the user decides.** Never edit, fix, or "address" a
   finding before the user has chosen what to do with it.
 - **Never batch-resolve unless told.** Only fix findings without per-finding
