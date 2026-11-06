@@ -17,6 +17,10 @@ test('reads roborev structured output', () => {
   expect(summary).toBe('Adds a Keycloak module.')
 })
 
+test('keeps the structured verdict', () => {
+  expect(fromStructured({ summary: 'No diff.', verdict: 'unable_to_review', findings: [] }).verdict).toBe('unable_to_review')
+})
+
 test('reads structured output with no findings', () => {
   expect(fromStructured({ summary: 'Clean.', findings: [] })).toEqual({ findings: [], summary: 'Clean.' })
 })

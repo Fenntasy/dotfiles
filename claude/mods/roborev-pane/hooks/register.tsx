@@ -19,7 +19,7 @@ const saved = atom({ plugin: 'roborev-pane', key: 'saved' } as const, {})
 const isOpenPending = atom({ plugin: 'roborev-pane', key: 'isOpenPending' } as const, false)
 
 const EXPLAIN_DESCRIPTION = `Writes your explanation of each finding of the roborev review shown in the roborev pane.
-Call it after you read the code and check each claim, in place of putting the findings in the chat.
+Call it after you read the code and check each claim, then summarize the findings in your final message.
 Write every text field in ASD-STE100 Simplified Technical English: one idea per sentence, 20 words at most per sentence, active voice, approved words, no idioms. Keep code names as they are.
 "problem" presents the problem itself, so the person knows what is at stake before your verdict: what goes wrong, when it happens, and what it costs the user or the code. Do not judge the claim here.
 "explanation" says whether the claim is true, and what you found in the code to check it.
@@ -76,12 +76,15 @@ async function fetchReview($: EngineInterface, jobId?: number): Promise<Review |
 }
 
 // Loads the review; opens the pane only when `isOpened` (the /roborev-pane command).
-async function show($: EngineInterface, jobId: number | undefined, isOpened: boolean): Promise<boolean> {
+async function show($: EngineInterface, jobId: number | undefined, isOpened: boolean): Promise<Review | undefined> {
   const fetched = await fetchReview($, jobId)
-  if (!fetched) return false
+  if (!fetched) return undefined
   await present($, fetched, isOpened)
-  return true
+  return fetched
 }
+
+// Nothing to decide and nothing went wrong: the pane stays closed.
+const isClean = (current: Review) => current.findings.length === 0 && !current.unparsed && current.verdict !== 'unable_to_review'
 
 async function present($: EngineInterface, fetched: Review, isOpened: boolean): Promise<void> {
   const previous = await read($, review)
@@ -106,7 +109,7 @@ async function present($: EngineInterface, fetched: Review, isOpened: boolean): 
     await update($, position, () => resumed?.position ?? 0)
     await update($, isRawShown, () => false)
   }
-  if (isOpened) await $.ui.open({ id: PANE, title: TITLE })
+  if (isOpened && !isClean(fetched)) await $.ui.open({ id: PANE, title: TITLE })
 }
 
 const severityColor = (severity: string) => (severity === 'Critical' || severity === 'High' ? 'error' : severity === 'Medium' ? 'warning' : 'suggestion')
@@ -130,7 +133,9 @@ export const register: Register = on => {
       return { text: 'Demo review loaded. The pane opens when the next turn ends: send any message.' }
     }
     const shown = await show($, undefined, true)
-    return { text: shown ? 'Roborev review pane opened.' : 'No finished roborev review for this branch.' }
+    if (!shown) return { text: 'No finished roborev review for this branch.' }
+    if (isClean(shown)) return { text: `Roborev job ${shown.jobId}: no issues. ${shown.summary}`.trim() }
+    return { text: 'Roborev review pane opened.' }
   })
 
   on('tool.call', { tool: 'Bash' }, async ($, e, next) => {
@@ -148,7 +153,8 @@ export const register: Register = on => {
     try {
       if (e.agentId === undefined && (await read($, isOpenPending))) {
         await update($, isOpenPending, () => false)
-        await $.ui.open({ id: PANE, title: TITLE })
+        const current = await read($, review)
+        if (current && !isClean(current)) await $.ui.open({ id: PANE, title: TITLE })
       }
     } catch {}
     return result
@@ -196,6 +202,16 @@ export const register: Register = on => {
             <Text color="warning">findings not parsed — roborev's own text</Text>
           </Text>
           <Markdown text={current.unparsed} />
+        </Box>
+      )
+    }
+    if (current.findings.length === 0 && current.verdict === 'unable_to_review') {
+      return (
+        <Box flexDirection="column" gap={1}>
+          <Text bold>
+            Job {current.jobId} · {current.branch} · <Text color="warning">roborev could not review</Text>
+          </Text>
+          {current.summary && <Markdown text={current.summary} />}
         </Box>
       )
     }

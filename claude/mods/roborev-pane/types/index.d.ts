@@ -7,6 +7,8 @@ export type Review = {
   summary: string;
   /** The whole review text, set when it has findings the parser could not read. */
   unparsed?: string;
+  /** roborev's structured verdict (`pass`, `fail`, `unable_to_review`); absent for text-only jobs. */
+  verdict?: string;
 };
 
 export type Decision = 'Fix' | 'Dismiss' | 'Discuss' | 'Skip';
