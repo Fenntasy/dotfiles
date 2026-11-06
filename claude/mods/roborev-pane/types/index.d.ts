@@ -34,6 +34,8 @@ declare module 'claude-code' {
       isRawShown: boolean;
       /** The walkthrough state of jobs the pane moved away from, keyed by job id. */
       saved: Record<string, JobState>;
+      /** Set by `explain`: the pane opens when the turn ends. */
+      isOpenPending: boolean;
     };
   }
 }

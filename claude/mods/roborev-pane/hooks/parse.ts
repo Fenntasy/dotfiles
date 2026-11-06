@@ -28,6 +28,25 @@ export function parseReview(output: string): { findings: Finding[]; summary: str
   return { findings, summary: summary.trim() }
 }
 
+export type StructuredOutput = {
+  summary?: string
+  findings?: { severity?: string; problem?: string; fix?: string; location?: string | null }[]
+}
+
+// roborev ≥ 0.74 `structured_output`: severities come lowercase (`low`), so they are capitalised to match the text format.
+export function fromStructured(structured: StructuredOutput): { findings: Finding[]; summary: string } {
+  const findings = (structured.findings ?? []).map(finding => {
+    const severity = finding.severity ?? ''
+    return {
+      severity: severity.charAt(0).toUpperCase() + severity.slice(1),
+      location: finding.location ?? '',
+      problem: finding.problem ?? '',
+      fix: finding.fix ?? '',
+    }
+  })
+  return { findings, summary: structured.summary ?? '' }
+}
+
 /** The job id a `roborev wait|show` command names, if any. */
 export function jobIdOf(command: string): number | undefined {
   const args = /\broborev\s+(?:wait|show)\b([^|;&\n]*)/.exec(command)?.[1] ?? ''

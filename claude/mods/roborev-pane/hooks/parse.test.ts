@@ -1,6 +1,25 @@
 import { expect, test } from 'claude-code/testing'
 
-import { isReviewCommand, jobIdOf, parseReview } from './parse'
+import { fromStructured, isReviewCommand, jobIdOf, parseReview } from './parse'
+
+test('reads roborev structured output', () => {
+  const { findings, summary } = fromStructured({
+    summary: 'Adds a Keycloak module.',
+    findings: [
+      { severity: 'low', problem: 'Docs keep placeholders.', fix: 'Fill them.', location: 'docs/index.md:6' },
+      { severity: 'critical', problem: 'Leaks a token.', fix: 'Mask it.', location: null },
+    ],
+  })
+  expect(findings).toEqual([
+    { severity: 'Low', location: 'docs/index.md:6', problem: 'Docs keep placeholders.', fix: 'Fill them.' },
+    { severity: 'Critical', location: '', problem: 'Leaks a token.', fix: 'Mask it.' },
+  ])
+  expect(summary).toBe('Adds a Keycloak module.')
+})
+
+test('reads structured output with no findings', () => {
+  expect(fromStructured({ summary: 'Clean.', findings: [] })).toEqual({ findings: [], summary: 'Clean.' })
+})
 
 const OUTPUT = `## Review Findings
 
