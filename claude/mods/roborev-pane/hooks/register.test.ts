@@ -26,6 +26,17 @@ function stubRoborev(on: On, structured: object): string[] {
   return opened
 }
 
+test('the pane stays closed at the end of the turn when another job loaded after the pending one', async ($, on) => {
+  const opened = stubRoborev(on, { summary: 'Adds a cache.', verdict: 'fail', findings: [{ severity: 'low', problem: 'P', fix: 'F', location: null }] })
+  on('tool.call', async () => ({ result: '' }))
+  on('turn.complete', async () => ({ text: '' }))
+
+  await $.command.run({ command: 'roborev-pane', args: 'demo' })
+  await $.tool.call({ tool: 'Bash', command: 'roborev show --job 7 --json' })
+  await $.turn.complete({ answer: '', durationMs: 1, isAborted: false, turnId: 't1', reason: 'answer' })
+  expect(opened).toEqual([])
+})
+
 test('a clean review does not open the pane', async ($, on) => {
   const opened = stubRoborev(on, { summary: 'Adds docs.', verdict: 'pass', findings: [] })
   const result = await $.command.run({ command: 'roborev-pane', args: '' })

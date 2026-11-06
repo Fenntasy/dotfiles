@@ -16,7 +16,7 @@ const explanations = atom({ plugin: 'roborev-pane', key: 'explanations' } as con
 const position = atom({ plugin: 'roborev-pane', key: 'position' } as const, 0)
 const isRawShown = atom({ plugin: 'roborev-pane', key: 'isRawShown' } as const, false)
 const saved = atom({ plugin: 'roborev-pane', key: 'saved' } as const, {})
-const isOpenPending = atom({ plugin: 'roborev-pane', key: 'isOpenPending' } as const, false)
+const pendingJobId = atom({ plugin: 'roborev-pane', key: 'pendingJobId' } as const, null)
 
 const EXPLAIN_DESCRIPTION = `Writes your explanation of each finding of the roborev review shown in the roborev pane.
 Call it after you read the code and check each claim, then summarize the findings in your final message.
@@ -129,7 +129,7 @@ export const register: Register = on => {
       await update($, decisions, () => ({}))
       await update($, explanations, () => DEMO_EXPLANATIONS)
       await update($, position, () => 0)
-      await update($, isOpenPending, () => true)
+      await update($, pendingJobId, () => DEMO_JOB_ID)
       return { text: 'Demo review loaded. The pane opens when the next turn ends: send any message.' }
     }
     const shown = await show($, undefined, true)
@@ -151,10 +151,12 @@ export const register: Register = on => {
   on('turn.complete', async ($, e, next) => {
     const result = await next(e)
     try {
-      if (e.agentId === undefined && (await read($, isOpenPending))) {
-        await update($, isOpenPending, () => false)
+      const pending = await read($, pendingJobId)
+      if (e.agentId === undefined && pending !== null) {
+        await update($, pendingJobId, () => null)
+        // Another job loaded since `explain`: its explanations are not there, so the pane stays closed.
         const current = await read($, review)
-        if (current && !isClean(current)) await $.ui.open({ id: PANE, title: TITLE })
+        if (current?.jobId === pending && !isClean(current)) await $.ui.open({ id: PANE, title: TITLE })
       }
     } catch {}
     return result
@@ -181,7 +183,7 @@ export const register: Register = on => {
       return written
     })
     await update($, isRawShown, () => false)
-    await update($, isOpenPending, () => true)
+    await update($, pendingJobId, () => current.jobId)
     const note = skipped.length
       ? ` Skipped finding number(s) ${skipped.join(', ')}: the review has ${current.findings.length} finding(s).`
       : ''
