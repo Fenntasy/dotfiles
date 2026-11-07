@@ -19,8 +19,11 @@ branching, see `claude/rules/git-conventions.md`.
   per-finding analysis, then let the user decide with the pane's buttons. Fall
   back to `AskUserQuestion` only when the tool is absent, or when `explain`
   reports the pane could not parse the findings. Never pick `AskUserQuestion`
-  because you have not yet loaded the deferred tool. The pane follows the job
-  by itself, so not seeing it is never a reason to fall back.
+  because you have not yet loaded the deferred tool. The pane opens only when
+  the turn that called `explain` ends, so not seeing it mid-turn is never a
+  reason to fall back. End that turn with a chat summary of the findings, so
+  the user reads it before the pane appears. The pane closes by itself once
+  every finding is Fix or Dismiss.
 - **Change no code until the user decides.** Never edit, fix, or "address" a
   finding before the user has chosen what to do with it.
 - **Never batch-resolve unless told.** Only fix findings without per-finding
